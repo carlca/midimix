@@ -56,16 +56,80 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
     Log.cls()
+    Log.send("initWork begun")
     initTransport(host)
     initOnMidiCallback(host)
     initOnSysexCallback(host)
+    /* 
+     * initTrackMap generates - mTracks: mutable.HashMap[Int, Int] 
+     * This key for this hash map is the MIDI number which uniquely 
+     * represents one of the 8 rotary MIDIMix knobs or the sliders
+     * The value it returns is 0 to 7 which represents the track number for that knob
+     * The final entry maps MIDI message 62 to value 255 for the Master track
+     * 
+     * mTrack should look like this...
+     * {16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3, 
+     *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7, 
+     *  62=255}
+     * 
+     * We are getting this at the moment...
+     * (16=16, 17=16, 18=16, 19=16, 20=20, 21=20, 22=20, 23=20, 24=24, 25=24, 26=24, 27=24, 28=28, 29=28, 30=28, 31=28, 
+     *  46=46, 47=46, 48=46, 49=46, 50=50, 51=50, 52=50, 53=50, 54=54, 55=54, 56=54, 57=54, 58=58, 59=58, 60=58, 61=58, 
+     *  62=255)
+     * 
+     *  Conclusion: initTrackMap fails. Unit tests to follow!
+     */
     initTrackMap()
+    var tracks = mTracks.toString()
+    Log.send("mTracks: %s", tracks);
+    /* 
+     * initTypeMap generates - mTypes: mutable.HashMap[Int, Int] 
+     * This key for this hash map is the MIDI number which uniquely 
+     * represents one of the 8 rotary MIDIMix knobs or the sliders
+     * The value it returns is 0 to 3 which represents the type number for that knob
+     * The types are: Type 0 - Top row of Send knobs    - SEND_A
+     *                Type 1 - Middle row of Send knobs - SEND_B
+     *                Type 2 - Lower row of send knobs  - SEND_C
+     *                Type 3 - Volume slider            - VOLUME
+     * 
+     * mTrack should look like this
+     * {16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3, 
+     *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3, 
+     *  62=3}
+     * 
+     * We are getting this at the moment...
+     * (16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3, 
+     *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3, 
+     *  62=3)
+     * 
+     * Conclusion: initTypeMap works as intended. Unit tests to follow!
+     */
     initTypeMap()
+    var types = mTypes.toString()
+    Log.send("mTypes: %s", types);
+    /* 
+     * Between them the two HashMaps - mTracks and mTypes - 
+     *  allow you to identify the track number and the track type 
+     * for any control in the MIDIMix which can return a 0-127 value.
+     */
     initTrackBanks(host)
     initMasterTrack(host)
     initCursorTrack(host)
+    Log.send("initWork ended")
   end initWork
 
+  private def initTrackMap(): Unit =
+    mTracks ++= (makeTrackHash(SEND_A) ++ makeTrackHash(SEND_B) ++ makeTrackHash(SEND_C) ++ makeTrackHash(VOLUME))
+    mTracks.put(MAST_MIDI, MASTER)
+    
+  private def initTypeMap(): Unit =
+    mTypes ++= (makeTypeHash(SEND_A) ++ makeTypeHash(SEND_B) ++ makeTypeHash(SEND_C) ++ makeTypeHash(VOLUME))
+    mTypes.put(MAST_MIDI, VOLUME)
+
+  private def makeTrackHash(offset: Int) = TRACKS.map(i => (i + offset, i))
+
+  private def makeTypeHash(offset: Int) = TRACKS.map(i => (i + offset, offset))
+  
   override def exit(): Unit = Log.send("MidiMix Exited")
 
   override def flush(): Unit = ()
@@ -77,14 +141,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     host.getMidiInPort(0).setSysexCallback(onSysex0)
 
   private def initTransport(host: ControllerHost): Unit = mTransport = host.createTransport
-
-  private def initTrackMap(): Unit =
-    mTracks ++= (makeTrackHash(SEND_A) ++ makeTrackHash(SEND_B) ++ makeTrackHash(SEND_C) ++ makeTrackHash(VOLUME))
-    mTracks.put(MAST_MIDI, MASTER)
-
-  private def initTypeMap(): Unit =
-    mTypes ++= (makeTypeHash(SEND_A) ++ makeTypeHash(SEND_B) ++ makeTypeHash(SEND_C) ++ makeTypeHash(VOLUME))
-    mTypes.put(MAST_MIDI, VOLUME)
 
   private def initTrackBanks(host: ControllerHost): Unit =
     mTrackBank = host.createTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
@@ -117,10 +173,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initCursorTrack(host: ControllerHost): Unit =
     mCursorTrack = host.createCursorTrack(1, 0)
 
-  private def makeTrackHash(offset: Int) = TRACKS.map(i => (TRACKS(i) + offset, i))
-
-  private def makeTypeHash(offset: Int) = TRACKS.map(i => (i + offset, offset))
-
   private def processControlChange(msg: ShortMidiMessage): Unit =
     val trackNum: Option[Int] = mTracks.get(msg.getData1)
     val typeNum: Option[Int]  = mTypes.get(msg.getData1)
@@ -134,7 +186,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   end processControlChange
 
   private def processNoteOff(msg: ShortMidiMessage): Unit =
-    if !mPending.isEmpty then processPending(mPending.pop)
+    if mPending.nonEmpty then processPending(mPending.pop)
 
   private def processPending(pending: Int): Unit =
     //
