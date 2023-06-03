@@ -1,0 +1,30 @@
+# Scala specific
+target/
+lib_managed/
+.project
+.classpath
+.cache/
+.history/
+.DS_Store
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+bin/
+
+# SBT specific
+.sbt/
+project/target/
+
+# Others
+.metals/
+.vscode/
+.bloop/
+metals.sbt
