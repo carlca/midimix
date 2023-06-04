@@ -2,6 +2,7 @@ package com.carlca
 package midimix
 
 import com.bitwig.extension.api.util.midi.ShortMidiMessage
+import com.bitwig.extension.callback.ShortMidiMessageReceivedCallback
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.config.Config
@@ -15,13 +16,12 @@ import scala.collection.mutable.Stack
 import midimix.MidiMixExtensionDefinition
 
 import java.util.HashMap
+import scala.collection.SortedMap
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
   // Class instances
   private var mTransport: Transport                          = null
-  private var mTracks: mutable.HashMap[Int, Int]             = mutable.HashMap.empty
-  private var mTypes: mutable.HashMap[Int, Int]              = mutable.HashMap.empty
   private var mPending: mutable.Stack[Int]                   = mutable.Stack.empty
   private var mTrackBank: TrackBank                          = null
   private var mMainTrackBank: TrackBank                      = null
@@ -29,6 +29,69 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private var mMasterTrack: Track                            = null
   private var mCursorTrack: CursorTrack                      = null
   private var mParentCounts: mutable.HashMap[Track, Integer] = mutable.HashMap.empty
+
+  /**
+  * mTracks[Int, Int]
+  *
+  * This key for this hash map is the MIDI number which uniquely
+  * represents one of the 8 rotary MIDIMix knobs or the sliders
+  * The value it returns is 0 to 7 which represents the track number for that knob
+  * The final entry maps MIDI message 62 to value 255 for the Master track
+  *
+  * Map[Int, Int] is an unsorted type which won't matter for operation.
+  * If the contents need to be eyeballed, use (SortedMap.from(mTracks)).toString()
+  *
+  *  mTracks should look like this...
+  * {16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3,
+  *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7,
+  *  62=255}
+  *
+  * We are getting this at the moment...
+  * (16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3,
+  *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7,
+  *  62=255)
+  *
+  *  Conclusion: initTrackMap works as intended. Unit tests to follow!
+  */
+  private lazy val mTracks: Map[Int, Int] =
+    def hash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((track, i) => (track + typeOffset, i))
+    Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
+
+  /**
+  * mTypes: Map[Int, Int]
+  *
+  * This key for this map is the MIDI number which uniquely
+  * represents one of the 8 rotary MIDIMix knobs or the sliders
+  * The value it returns is 0 to 3 which represents the type number for that knob
+  * The types are: Type 0 - Top row of Send knobs    - SEND_A
+  *                Type 1 - Middle row of Send knobs - SEND_B
+  *                Type 2 - Lower row of send knobs  - SEND_C
+  *                Type 3 - Volume slider            - VOLUME
+  *
+  * Map[Int, Int] is an unsorted type which won't matter for operation.
+  * If the contents need to be eyeballed, use (SortedMap.from(mTypes)).toString()
+  *
+  * mTypes should look like this, when sorted...
+  * {16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3,
+  *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3,
+  *  62=3}
+  *
+  * We are getting this at the moment...
+  * (16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3,
+  *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3,
+  *  62=3)
+  *
+  * Conclusion: mTypes works as intended. Unit tests to follow!
+  */
+  private lazy val mTypes: Map[Int, Int] =
+    def hash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.map(i => (i + typeOffset, typeOffset))
+    Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
+
+  /**
+  * Between them the two Maps - mTracks and mTypes -
+  *  allow you to identify the track number and the track type
+  * for any control in the MIDIMix which can return a 0-127 value.
+  */
   // Consts
   private val APP_NAME                     = "com.carlca.MidiMix"
   private val MAX_TRACKS: Int              = 0x10
@@ -58,79 +121,18 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
     Log.cls()
+    Log.send("mTracks: %s", SortedMap.from(mTracks).toString());
+    Log.send("mTypes: %s", SortedMap.from(mTypes).toString());
+    Log.line()
     Log.send("initWork begun")
     initTransport(host)
     initOnMidiCallback(host)
     initOnSysexCallback(host)
-    /* 
-     * initTrackMap generates - mTracks: mutable.HashMap[Int, Int] 
-     * This key for this hash map is the MIDI number which uniquely 
-     * represents one of the 8 rotary MIDIMix knobs or the sliders
-     * The value it returns is 0 to 7 which represents the track number for that knob
-     * The final entry maps MIDI message 62 to value 255 for the Master track
-     * 
-     * mTracks should look like this...
-     * {16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3, 
-     *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7, 
-     *  62=255}
-     * 
-     * We are getting this at the moment...
-     * (16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3, 
-     *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7, 
-     *  62=255)
-     * 
-     *  Conclusion: initTrackMap works as intended. Unit tests to follow!
-     */
-    initTrackMap()
-    var tracks = mTracks.toString()
-    Log.send("mTracks: %s", tracks);
-    /* 
-     * initTypeMap generates - mTypes: mutable.HashMap[Int, Int] 
-     * This key for this hash map is the MIDI number which uniquely 
-     * represents one of the 8 rotary MIDIMix knobs or the sliders
-     * The value it returns is 0 to 3 which represents the type number for that knob
-     * The types are: Type 0 - Top row of Send knobs    - SEND_A
-     *                Type 1 - Middle row of Send knobs - SEND_B
-     *                Type 2 - Lower row of send knobs  - SEND_C
-     *                Type 3 - Volume slider            - VOLUME
-     * 
-     * mTypes should look like this
-     * {16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3, 
-     *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3, 
-     *  62=3}
-     * 
-     * We are getting this at the moment...
-     * (16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3, 
-     *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3, 
-     *  62=3)
-     * 
-     * Conclusion: initTypeMap works as intended. Unit tests to follow!
-     */
-    initTypeMap()
-    var types = mTypes.toString()
-    Log.send("mTypes: %s", types);
-    /* 
-     * Between them the two HashMaps - mTracks and mTypes - 
-     *  allow you to identify the track number and the track type 
-     * for any control in the MIDIMix which can return a 0-127 value.
-     */
     initTrackBanks(host)
     initMasterTrack(host)
     initCursorTrack(host)
     Log.send("initWork ended")
   end initWork
-
-  private def initTrackMap(): Unit =
-    mTracks ++= (makeTrackHash(SEND_A) ++ makeTrackHash(SEND_B) ++ makeTrackHash(SEND_C) ++ makeTrackHash(VOLUME))
-    mTracks.put(MAST_MIDI, MASTER)
-    
-  private def initTypeMap(): Unit =
-    mTypes ++= (makeTypeHash(SEND_A) ++ makeTypeHash(SEND_B) ++ makeTypeHash(SEND_C) ++ makeTypeHash(VOLUME))
-    mTypes.put(MAST_MIDI, VOLUME)
-
-  private def makeTrackHash(offset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((v, i) => (v + offset, i))
-
-  private def makeTypeHash(offset: Int) = TRACKS.map(i => (i + offset, offset))
 
   override def exit(): Unit = Log.send("MidiMix Exited")
 
@@ -138,6 +140,11 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   private def initOnMidiCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))
+
+  // private def initOnMidiCallback(host: ControllerHost) =
+  //   val midiIn: MidiIn = host.getMidiInPort(0)
+  //   midiIn.setMidiCallback((msg: ShortMidiMessage) => onMidi0(ShortMidiMessage(msg)))
+  //   asInstanceOf[ShortMidiMessageReceivedCallback]
 
   private def initOnSysexCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setSysexCallback(onSysex0)
