@@ -14,6 +14,8 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.Stack
 import midimix.MidiMixExtensionDefinition
 
+import java.util.HashMap
+
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
   // Class instances
@@ -67,17 +69,17 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
      * The value it returns is 0 to 7 which represents the track number for that knob
      * The final entry maps MIDI message 62 to value 255 for the Master track
      * 
-     * mTrack should look like this...
+     * mTracks should look like this...
      * {16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3, 
      *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7, 
      *  62=255}
      * 
      * We are getting this at the moment...
-     * (16=16, 17=16, 18=16, 19=16, 20=20, 21=20, 22=20, 23=20, 24=24, 25=24, 26=24, 27=24, 28=28, 29=28, 30=28, 31=28, 
-     *  46=46, 47=46, 48=46, 49=46, 50=50, 51=50, 52=50, 53=50, 54=54, 55=54, 56=54, 57=54, 58=58, 59=58, 60=58, 61=58, 
+     * (16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3, 
+     *  46=4, 47=4, 48=4, 49=4, 50=5, 51=5, 52=5, 53=5, 54=6, 55=6, 56=6, 57=6, 58=7, 59=7, 60=7, 61=7, 
      *  62=255)
      * 
-     *  Conclusion: initTrackMap fails. Unit tests to follow!
+     *  Conclusion: initTrackMap works as intended. Unit tests to follow!
      */
     initTrackMap()
     var tracks = mTracks.toString()
@@ -92,7 +94,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
      *                Type 2 - Lower row of send knobs  - SEND_C
      *                Type 3 - Volume slider            - VOLUME
      * 
-     * mTrack should look like this
+     * mTypes should look like this
      * {16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3, 
      *  46=0, 47=1, 48=2, 49=3, 50=0, 51=1, 52=2, 53=3, 54=0, 55=1, 56=2, 57=3, 58=0, 59=1, 60=2, 61=3, 
      *  62=3}
@@ -126,10 +128,10 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     mTypes ++= (makeTypeHash(SEND_A) ++ makeTypeHash(SEND_B) ++ makeTypeHash(SEND_C) ++ makeTypeHash(VOLUME))
     mTypes.put(MAST_MIDI, VOLUME)
 
-  private def makeTrackHash(offset: Int) = TRACKS.map(i => (i + offset, i))
+  private def makeTrackHash(offset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((v, i) => (v + offset, i))
 
   private def makeTypeHash(offset: Int) = TRACKS.map(i => (i + offset, offset))
-  
+
   override def exit(): Unit = Log.send("MidiMix Exited")
 
   override def flush(): Unit = ()
