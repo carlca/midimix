@@ -133,7 +133,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     initCursorTrack(host)
     Log.send("initWork ended")
   end initWork
-
   override def exit(): Unit = Log.send("MidiMix Exited")
 
   override def flush(): Unit = ()
@@ -186,7 +185,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     val trackNum: Option[Int] = mTracks.get(msg.getData1)
     val typeNum: Option[Int]  = mTypes.get(msg.getData1)
     val valueNum: Int         = msg.getData2
-    Log.send("Track: %d  Type: %d  Value: %d", trackNum, typeNum, valueNum)
+    Log.send(s"Track: %d  Type: %d  Value: %d", trackNum.get, typeNum.get, valueNum)
     val volume = valueNum / 127.0
     if trackNum.contains(MASTER) then mMasterTrack.volume.set(volume)
     else
