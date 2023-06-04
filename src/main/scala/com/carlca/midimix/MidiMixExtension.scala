@@ -18,6 +18,8 @@ import midimix.MidiMixExtensionDefinition
 import java.util.HashMap
 import scala.collection.SortedMap
 
+//class ControlChange 
+
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
   // Class instances
@@ -140,11 +142,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initOnMidiCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))
 
-  // private def initOnMidiCallback(host: ControllerHost) =
-  //   val midiIn: MidiIn = host.getMidiInPort(0)
-  //   midiIn.setMidiCallback((msg: ShortMidiMessage) => onMidi0(ShortMidiMessage(msg)))
-  //   asInstanceOf[ShortMidiMessageReceivedCallback]
-
   private def initOnSysexCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setSysexCallback(onSysex0)
 
@@ -181,11 +178,13 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initCursorTrack(host: ControllerHost): Unit =
     mCursorTrack = host.createCursorTrack(1, 0)
 
+  //class ControlChange 
+
   private def processControlChange(msg: ShortMidiMessage): Unit =
     val trackNum: Option[Int] = mTracks.get(msg.getData1)
     val typeNum: Option[Int]  = mTypes.get(msg.getData1)
     val valueNum: Int         = msg.getData2
-    Log.send(s"Track: %d  Type: %d  Value: %d", trackNum.get, typeNum.get, valueNum)
+    Log.send(s"Track: ${trackNum.get}  Type: ${typeNum.get}  Value: $valueNum")
     val volume = valueNum / 127.0
     if trackNum.contains(MASTER) then mMasterTrack.volume.set(volume)
     else
@@ -202,17 +201,17 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     // TODO: Work out how to handle folders
     //
     Log.line()
-    Log.send("mMainTrackBank.itemCount().getAsInt(): %d", mMainTrackBank.itemCount().getAsInt)
-    Log.send("mMainTrackBank.getSizeOfBank: %d", mMainTrackBank.getSizeOfBank)
-    Log.send("mMainTrackBank.getCapacityOfBank: %d", mMainTrackBank.getCapacityOfBank)
+    Log.send(s"mMainTrackBank.itemCount().getAsInt(): ${mMainTrackBank.itemCount().getAsInt}")
+    Log.send(s"mMainTrackBank.getSizeOfBank: ${mMainTrackBank.getSizeOfBank}")
+    Log.send(s"mMainTrackBank.getCapacityOfBank: ${mMainTrackBank.getCapacityOfBank}")
     Log.line()
-    Log.send("mTrackBank.itemCount().getAsInt(): %d", mTrackBank.itemCount.getAsInt)
-    Log.send("mTrackBank.getSizeOfBank: %d", mTrackBank.getSizeOfBank)
-    Log.send("mTrackBank.getCapacityOfBank: %d", mTrackBank.getCapacityOfBank)
+    Log.send(s"mTrackBank.itemCount().getAsInt(): ${mTrackBank.itemCount.getAsInt}")
+    Log.send(s"mTrackBank.getSizeOfBank: ${mTrackBank.getSizeOfBank}")
+    Log.send(s"mTrackBank.getCapacityOfBank: ${mTrackBank.getCapacityOfBank}")
     Log.line()
-    Log.send("mEffectTrackBank.itemCount().getAsInt(): %d", mEffectTrackBank.itemCount.getAsInt)
-    Log.send("mEffectTrackBank.getSizeOfBank: %d", mEffectTrackBank.getSizeOfBank)
-    Log.send("mEffectTrackBank.getCapacityOfBank: %d", mEffectTrackBank.getCapacityOfBank)
+    Log.send(s"mEffectTrackBank.itemCount().getAsInt(): ${mEffectTrackBank.itemCount.getAsInt}")
+    Log.send(s"mEffectTrackBank.getSizeOfBank: ${mEffectTrackBank.getSizeOfBank}")
+    Log.send(s"mEffectTrackBank.getCapacityOfBank: ${mEffectTrackBank.getCapacityOfBank}")
     Log.line()
     iterateTracks(mMainTrackBank)
     Log.line()
@@ -226,27 +225,21 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   private def iterateTracks(): Unit = for i <- 0 until mTrackBank.getSizeOfBank do
     val track = mTrackBank.getItemAt(i)
-    if track.isGroup.get then Log.send("Group: %s", track.name.get)
+    if track.isGroup.get then Log.send(s"Group: ${track.name.get}")
     else
       val trackType = track.trackType.get
       if trackType.nonEmpty then
         if "InstrumentAudioEffectMaster".contains(trackType) then
-          Log.send("%s: %s  Position: %d", trackType, track.name.get, track.position.get)
+          Log.send(s"{$trackType}: ${track.name.get}  Position: ${track.position.get}")
   end iterateTracks
 
   private def iterateTracks(bank: TrackBank): Unit =
     val trackCount = Math.min(bank.itemCount.getAsInt, bank.getSizeOfBank)
     val bankClass  = StringUtils.unadornedClassName(bank)
-    Log.send("%s.(Effective)itemCount() %d", bankClass, trackCount)
+    Log.send(s"$bankClass.(Effective)itemCount() $trackCount")
     for i <- 0 until trackCount do
       val track = bank.getItemAt(i)
-      Log.send(
-        "Track #: %d, Name: %s, Positions: %d, IsSubscribed: %b",
-        i,
-        track.name.get,
-        track.position.get,
-        track.name.isSubscribed
-      )
+      Log.send(s"Track #: $i, Name: ${track.name.get}, Positions: ${track.position.get}, IsSubscribed: ${track.name.isSubscribed}")
   end iterateTracks
 
   private def processNoteOn(msg: ShortMidiMessage): Unit = mPending.push(msg.getData1)
