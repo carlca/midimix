@@ -128,9 +128,9 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     mTypes ++= (makeTypeHash(SEND_A) ++ makeTypeHash(SEND_B) ++ makeTypeHash(SEND_C) ++ makeTypeHash(VOLUME))
     mTypes.put(MAST_MIDI, VOLUME)
 
-  private def makeTrackHash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((track, i) => (track + typeOffset, i))
+  private def makeTrackHash(offset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((v, i) => (v + offset, i))
 
-  private def makeTypeHash(typeOffset: Int) = TRACKS.map(i => (i + typeOffset, typeOffset))
+  private def makeTypeHash(offset: Int) = TRACKS.map(i => (i + offset, offset))
 
   override def exit(): Unit = Log.send("MidiMix Exited")
 
