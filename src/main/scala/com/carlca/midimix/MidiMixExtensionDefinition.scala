@@ -19,7 +19,6 @@ class MidiMixExtensionDefinition extends ControllerExtensionDefinition:
   override def getRequiredAPIVersion = 18
   override def getNumMidiInPorts     = 1
   override def getNumMidiOutPorts    = 1
-  override def listAutoDetectionMidiPortNames(list: AutoDetectionMidiPortNamesList, platformType: PlatformType): Unit =
-    ()
+  override def listAutoDetectionMidiPortNames(list: AutoDetectionMidiPortNamesList, platformType: PlatformType): Unit = ()
   override def createInstance(host: ControllerHost) = new MidiMixExtension(this, host)
 end MidiMixExtensionDefinition
