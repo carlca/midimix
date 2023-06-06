@@ -3,7 +3,7 @@ class testMaps {
   * mTracks[Int, Int]
   * 
   * Map[Int, Int] is an unsorted type which won't matter for operation.
-  * If the contents need to be eyeballed, use (SortedMap.from(mTracks)).toString()
+  * If the contents need to be eyeballed, use (SortedMap.from(mTracks)).toString
   *
   *  mTracks should look like this...
   * {16=0, 17=0, 18=0, 19=0, 20=1, 21=1, 22=1, 23=1, 24=2, 25=2, 26=2, 27=2, 28=3, 29=3, 30=3, 31=3,
@@ -23,7 +23,7 @@ class testMaps {
   * mTypes: Map[Int, Int]
   * 
   * Map[Int, Int] is an unsorted type which won't matter for operation.
-  * If the contents need to be eyeballed, use (SortedMap.from(mTypes)).toString()
+  * If the contents need to be eyeballed, use (SortedMap.from(mTypes)).toString
   *
   * mTypes should look like this, when sorted...
   * {16=0, 17=1, 18=2, 19=3, 20=0, 21=1, 22=2, 23=3, 24=0, 25=1, 26=2, 27=3, 28=0, 29=1, 30=2, 31=3,

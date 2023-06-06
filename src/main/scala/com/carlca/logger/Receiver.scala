@@ -2,9 +2,8 @@ package com.carlca
 package logger
 
 import java.io.*
-import java.net.{InetSocketAddress, ServerSocket}
+import java.net.ServerSocket
 
-import scala.util.Random
 import scala.util.{Using, Try}
 
 import com.carlca.config.Config
@@ -13,7 +12,7 @@ import com.carlca.utils.ConsoleUtils
 object Receiver:
 
   def main(args: Array[String]): Unit = try
-    val port         = findFreePort().get
+    val port         = findFreePort.get
     val serverSocket = new ServerSocket(port)
     outputMessage("Receiver listening on port " + port)
     outputMessage("")
@@ -24,11 +23,10 @@ object Receiver:
       new Thread(() =>
         try
           Config.setLogPort(0)
-          serverSocket.close()
+          serverSocket.close
         catch
           case e: IOException =>
-            e.printStackTrace()
-      )
+            e.printStackTrace)
     )
     while !Thread.interrupted do
       val socket      = serverSocket.accept
@@ -36,11 +34,11 @@ object Receiver:
       val reader      = new BufferedReader(new InputStreamReader(inputStream))
       val message     = reader.readLine
       outputMessage(message)
-      reader.close()
-    serverSocket.close()
+      reader.close
+    serverSocket.close
   catch
     case e: IOException =>
-      e.printStackTrace()
+      e.printStackTrace
   end main
 
   private def outputMessage(msg: String): Unit =
@@ -48,6 +46,6 @@ object Receiver:
     else System.out.println(msg)
   end outputMessage
 
-  private def findFreePort(): Try[Int] = Using(new ServerSocket(0))(_.getLocalPort)
+  private def findFreePort: Try[Int] = Using(new ServerSocket(0))(_.getLocalPort)
 
 end Receiver

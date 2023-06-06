@@ -1,15 +1,11 @@
 package com.carlca
 package config
 
-import scala.util.{Failure, Success, Try}
-import scala.language.postfixOps
-import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.Objects
-import java.util.Properties
+
 import org.json.*
 import org.json.JSONObject
 
@@ -21,7 +17,7 @@ object Config:
 
   def init(appName: String): Unit =
     Config.appName = Some(appName)
-    initFolder()
+    initFolder
 
   def getLogPort: Integer =
     getJsonObject.getInt("logPort")
@@ -59,7 +55,7 @@ object Config:
     Paths.get(folder).resolve("config.json")
   end getConfigPath
 
-  private def initFolder(): Unit =
+  private def initFolder: Unit =
     val path = Paths.get(this.getConfigFolder)
     if !Files.exists(path) then Files.createDirectories(path)
   end initFolder

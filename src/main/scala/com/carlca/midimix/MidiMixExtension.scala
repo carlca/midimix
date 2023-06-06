@@ -2,20 +2,15 @@ package com.carlca
 package midimix
 
 import com.bitwig.extension.api.util.midi.ShortMidiMessage
-import com.bitwig.extension.callback.ShortMidiMessageReceivedCallback
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.config.Config
 import com.carlca.logger.Log
 import com.carlca.utils.StringUtils
 
-import java.io.IOException
 import scala.collection.mutable
-import scala.collection.mutable.HashMap
 import scala.collection.mutable.Stack
-import midimix.MidiMixExtensionDefinition
 
-import java.util.HashMap
 import scala.collection.SortedMap
 
 // private def processControlChange(msg: ShortMidiMessage): Unit =
@@ -37,7 +32,6 @@ class MidiProcessor:
 end MidiProcessor
 
 object Maps:
-  // Consts
   private val TRACK_1: Int                 = 0x10
   private val TRACK_2: Int                 = 0x14
   private val TRACK_3: Int                 = 0x18
@@ -78,13 +72,8 @@ object Maps:
   private lazy val mTypes: Map[Int, Int] =
     def hash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.map(i => (i + typeOffset, typeOffset))
     Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
-
-  def tracksLog: String =   
-    s"mTracks: ${SortedMap.from(mTracks).toString()}"
-
-  def typesLog: String = 
-    s"mTypes: ${SortedMap.from(mTypes).toString()}"
-
+  def tracksLog: String = s"mTracks: ${SortedMap.from(mTracks).toString}"
+  def typesLog: String = s"mTypes: ${SortedMap.from(mTypes).toString}"
 end Maps
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
@@ -97,23 +86,22 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private var mEffectTrackBank: TrackBank                    = null
   private var mMasterTrack: Track                            = null
   private var mCursorTrack: CursorTrack                      = null
-  private var mParentCounts: mutable.HashMap[Track, Integer] = mutable.HashMap.empty
   // Consts
-  private val APP_NAME                     = "com.carlca.MidiMix"
-  private val MAX_TRACKS: Int              = 0x10
-  private val MAX_SENDS: Int               = 0x03
-  private val MAX_SCENES: Int              = 0x10
+  private val APP_NAME        = "com.carlca.MidiMix"
+  private val MAX_TRACKS: Int = 0x10
+  private val MAX_SENDS:  Int = 0x03
+  private val MAX_SCENES: Int = 0x10
   
-  override def init(): Unit =
+  override def init: Unit =
     val host = getHost
     initWork(host)
 
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
-    Log.cls()
+    Log.cls
     Log.send(Maps.tracksLog)
     Log.send(Maps.typesLog);
-    Log.line()
+    Log.line
     Log.send("initWork begun")
     initTransport(host)
     initOnMidiCallback(host)
@@ -123,9 +111,9 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     initCursorTrack(host)
     Log.send("initWork ended")
   end initWork
-  override def exit(): Unit = Log.send("MidiMix Exited")
+  override def exit: Unit = Log.send("MidiMix Exited")
 
-  override def flush(): Unit = ()
+  override def flush: Unit = ()
 
   private def initOnMidiCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))
@@ -148,19 +136,19 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     mMasterTrack = host.createMasterTrack(0)
 
   private def initInterest(bank: TrackBank): Unit =
-    bank.itemCount.markInterested()
-    bank.channelCount.markInterested()
+    bank.itemCount.markInterested
+    bank.channelCount.markInterested
     for i <- 0 until bank.getCapacityOfBank do
       val track = bank.getItemAt(i)
-      track.name.markInterested()
-      track.isGroup.markInterested()
-      track.canHoldNoteData.markInterested()
-      track.canHoldAudioData.markInterested()
-      track.trackType.markInterested()
-      track.position.markInterested()
-      track.exists.markInterested()
+      track.name.markInterested
+      track.isGroup.markInterested
+      track.canHoldNoteData.markInterested
+      track.canHoldAudioData.markInterested
+      track.trackType.markInterested
+      track.position.markInterested
+      track.exists.markInterested
       val parent = track.createParentTrack(0, 0)
-      parent.name.markInterested()
+      parent.name.markInterested
   end initInterest
 
   private def initCursorTrack(host: ControllerHost): Unit =
@@ -178,34 +166,35 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
       track.volume.set(volume)
   end processControlChange
 
-  private def processNoteOff(msg: ShortMidiMessage): Unit =
+  private def processNoteOff: Unit =
     if mPending.nonEmpty then processPending(mPending.pop)
 
   private def processPending(pending: Int): Unit =
-    Log.line()
-    Log.send(s"mMainTrackBank.itemCount().getAsInt(): ${mMainTrackBank.itemCount().getAsInt}")
+    Log.line
+    Log.send(s"pending: $pending")
+    Log.send(s"mMainTrackBank.itemCount.getAsInt: ${mMainTrackBank.itemCount.getAsInt}")
     Log.send(s"mMainTrackBank.getSizeOfBank: ${mMainTrackBank.getSizeOfBank}")
     Log.send(s"mMainTrackBank.getCapacityOfBank: ${mMainTrackBank.getCapacityOfBank}")
-    Log.line()
-    Log.send(s"mTrackBank.itemCount().getAsInt(): ${mTrackBank.itemCount.getAsInt}")
+    Log.line
+    Log.send(s"mTrackBank.itemCount.getAsInt: ${mTrackBank.itemCount.getAsInt}")
     Log.send(s"mTrackBank.getSizeOfBank: ${mTrackBank.getSizeOfBank}")
     Log.send(s"mTrackBank.getCapacityOfBank: ${mTrackBank.getCapacityOfBank}")
-    Log.line()
-    Log.send(s"mEffectTrackBank.itemCount().getAsInt(): ${mEffectTrackBank.itemCount.getAsInt}")
+    Log.line
+    Log.send(s"mEffectTrackBank.itemCount.getAsInt: ${mEffectTrackBank.itemCount.getAsInt}")
     Log.send(s"mEffectTrackBank.getSizeOfBank: ${mEffectTrackBank.getSizeOfBank}")
     Log.send(s"mEffectTrackBank.getCapacityOfBank: ${mEffectTrackBank.getCapacityOfBank}")
-    Log.line()
+    Log.line
     iterateTracks(mMainTrackBank)
-    Log.line()
+    Log.line
     iterateTracks(mTrackBank)
-    Log.line()
+    Log.line
     iterateTracks(mEffectTrackBank)
-    Log.line()
-    iterateTracks()
-    Log.line()
+    Log.line
+    iterateTracks
+    Log.line
   end processPending
 
-  private def iterateTracks(): Unit = for i <- 0 until mTrackBank.getSizeOfBank do
+  private def iterateTracks: Unit = for i <- 0 until mTrackBank.getSizeOfBank do
     val track = mTrackBank.getItemAt(i)
     if track.isGroup.get then Log.send(s"Group: ${track.name.get}")
     else
@@ -218,7 +207,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def iterateTracks(bank: TrackBank): Unit =
     val trackCount = Math.min(bank.itemCount.getAsInt, bank.getSizeOfBank)
     val bankClass  = StringUtils.unadornedClassName(bank)
-    Log.send(s"$bankClass.(Effective)itemCount() $trackCount")
+    Log.send(s"$bankClass.(Effective)itemCount $trackCount")
     for i <- 0 until trackCount do
       val track = bank.getItemAt(i)
       Log.send(s"Track #: $i, Name: ${track.name.get}, Positions: ${track.position.get}, IsSubscribed: ${track.name.isSubscribed}")
@@ -228,7 +217,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   private def onMidi0(msg: ShortMidiMessage): Unit =
     if msg.isControlChange then processControlChange(msg)
-    else if msg.isNoteOff then processNoteOff(msg)
+    else if msg.isNoteOff then processNoteOff
     else if msg.isNoteOn then processNoteOn(msg)
   end onMidi0
 

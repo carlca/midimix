@@ -23,7 +23,8 @@
         </executions>
         <configuration>
           <args>
-            <arg>-Wunused:imports</arg>
+            <arg>-deprecation</arg>
+            <arg>-Wunused:imports,privates,locals,explicits</arg>
           </args>
         </configuration>
       </plugin>

@@ -2,7 +2,6 @@ package com.carlca
 package utils
 
 import java.util
-import java.util.ArrayList.*
 
 object ArrayUtils:
 
@@ -12,7 +11,7 @@ object ArrayUtils:
     while iterator.hasNext do
       val element = iterator.next
       if element.trim.startsWith(item.trim) then
-        iterator.remove()
+        iterator.remove
         found = true
     found
   end removeElements
