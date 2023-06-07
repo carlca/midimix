@@ -25,10 +25,10 @@ import scala.collection.SortedMap
 //     track.volume.set(volume)
 // end processControlChange
 
-class MidiProcessor: 
-//   throw new IllegalArgumentException("msg is not a CC message!")
-  def process(msg: ShortMidiMessage) = ???
-
+object MidiProcessor: 
+  def process(msg: ShortMidiMessage) =
+    var trackNum: Option[Int] = Maps.getTrackNum(msg)
+    var typeNum:  Option[Int] = Maps.getTypeNum(msg)
 end MidiProcessor
 
 object Maps:
@@ -74,6 +74,8 @@ object Maps:
     Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
   def tracksLog: String = s"mTracks: ${SortedMap.from(mTracks).toString}"
   def typesLog: String = s"mTypes: ${SortedMap.from(mTypes).toString}"
+  def getTrackNum(msg: ShortMidiMessage): Option[Int] = mTracks.get(msg.getData1)
+  def getTypeNum(msg: ShortMidiMessage): Option[Int] = mTypes.get(msg.getData1)
 end Maps
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
