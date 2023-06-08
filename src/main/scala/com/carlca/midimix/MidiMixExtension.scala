@@ -11,72 +11,17 @@ import com.carlca.utils.StringUtils
 import scala.collection.mutable
 import scala.collection.mutable.Stack
 
-import scala.collection.SortedMap
-
 // private def processControlChange(msg: ShortMidiMessage): Unit =
-//   val trackNum: Option[Int] = mTracks.get(msg.getData1)
-//   val typeNum: Option[Int]  = mTypes.get(msg.getData1)
+//   val track: Option[Int] = mTracks.get(msg.getData1)
+//   val kindNum: Option[Int]  = mKinds.get(msg.getData1)
 //   val valueNum: Int         = msg.getData2
-//   Log.send(s"Track: ${trackNum.get}  Type: ${typeNum.get}  Value: $valueNum")
+//   Log.send(s"Track: ${track.get}  Kind: ${kindNum.get}  Value: $valueNum")
 //   val volume = valueNum / 127.0
-//   if trackNum.contains(MASTER) then mMasterTrack.volume.set(volume)
+//   if track.contains(MASTER) then mMasterTrack.volume.set(volume)
 //   else
-//     val track = mTrackBank.getItemAt(trackNum.get)
+//     val track = mTrackBank.getItemAt(track.get)
 //     track.volume.set(volume)
 // end processControlChange
-
-object MidiProcessor: 
-  def process(msg: ShortMidiMessage) =
-    var trackNum: Option[Int] = Maps.getTrackNum(msg)
-    var typeNum:  Option[Int] = Maps.getTypeNum(msg)
-end MidiProcessor
-
-object Maps:
-  private val TRACK_1: Int                 = 0x10
-  private val TRACK_2: Int                 = 0x14
-  private val TRACK_3: Int                 = 0x18
-  private val TRACK_4: Int                 = 0x1c
-  private val TRACK_5: Int                 = 0x2e
-  private val TRACK_6: Int                 = 0x32
-  private val TRACK_7: Int                 = 0x36
-  private val TRACK_8: Int                 = 0x3a
-  private val TRACKS: Seq[Int]             = Seq(TRACK_1, TRACK_2, TRACK_3, TRACK_4, TRACK_5, TRACK_6, TRACK_7, TRACK_8)
-  private val MAST_MIDI: Int               = 0x3e
-  private val SEND_A: Int                  = 0
-  private val SEND_B: Int                  = 1
-  private val SEND_C: Int                  = 2
-  private val VOLUME: Int                  = 3
-  private val MASTER: Int                  = 0xff
- /**
-  * mTracks[Int, Int]
-  *
-  * This key for this hash map is the MIDI number which uniquely
-  * represents one of the 8 rotary MIDIMix knobs or the sliders
-  * The value it returns is 0 to 7 which represents the track number for that knob
-  * The final entry maps MIDI message 62 to value 255 for the Master track
-  */
-  private lazy val mTracks: Map[Int, Int] =
-    def hash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.zipWithIndex.map((track, i) => (track + typeOffset, i))
-    Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
- /**
-  * mTypes: Map[Int, Int]
-  *
-  * This key for this map is the MIDI number which uniquely
-  * represents one of the 8 rotary MIDIMix knobs or the sliders
-  * The value it returns is 0 to 3 which represents the type number for that knob
-  * The types are: Type 0 - Top row of Send knobs    - SEND_A
-  *                Type 1 - Middle row of Send knobs - SEND_B
-  *                Type 2 - Lower row of send knobs  - SEND_C
-  *                Type 3 - Volume slider            - VOLUME
-  */ 
-  private lazy val mTypes: Map[Int, Int] =
-    def hash(typeOffset: Int): Seq[(Int, Int)] = TRACKS.map(i => (i + typeOffset, typeOffset))
-    Map.from(Seq(SEND_A, SEND_B, SEND_C, VOLUME).flatMap(hash) :+ (MAST_MIDI, MASTER))
-  def tracksLog: String = s"mTracks: ${SortedMap.from(mTracks).toString}"
-  def typesLog: String = s"mTypes: ${SortedMap.from(mTypes).toString}"
-  def getTrackNum(msg: ShortMidiMessage): Option[Int] = mTracks.get(msg.getData1)
-  def getTypeNum(msg: ShortMidiMessage): Option[Int] = mTypes.get(msg.getData1)
-end Maps
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
@@ -97,12 +42,13 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   override def init: Unit =
     val host = getHost
     initWork(host)
+    MidiProcessor.onVolumeChanged(new VolumeChangeEvent)
 
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
     Log.cls
     Log.send(Maps.tracksLog)
-    Log.send(Maps.typesLog);
+    Log.send(Maps.kindsLog);
     Log.line
     Log.send("initWork begun")
     initTransport(host)
@@ -157,15 +103,14 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     mCursorTrack = host.createCursorTrack(1, 0)
 
   private def processControlChange(msg: ShortMidiMessage): Unit =
-    val trackNum: Option[Int] = ??? // mTracks.get(msg.getData1)
-    val typeNum: Option[Int]  = ??? // mTypes.get(msg.getData1)
-    val valueNum: Int = msg.getData2
-    Log.send(s"Track: $trackNum  Type: $typeNum  Value: $valueNum")
-    val volume = valueNum / 127.0
-    if trackNum.contains(???) then mMasterTrack.volume.set(volume)
+    val track: Option[Int] = ??? // mTracks.get(msg.getData1)
+    val kind: Option[Int]  = ??? // mKinds.get(msg.getData1)
+    val value: Int = msg.getData2
+    Log.send(s"Track: $track  Kind: $kind  Value: $value")
+    val volume = value / 127.0
+    if track.contains(???) then mMasterTrack.volume.set(volume)
     else
-      val track = mTrackBank.getItemAt(trackNum.get)
-      track.volume.set(volume)
+      mTrackBank.getItemAt(track.get).volume.set(volume)
   end processControlChange
 
   private def processNoteOff: Unit =
@@ -215,15 +160,24 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
       Log.send(s"Track #: $i, Name: ${track.name.get}, Positions: ${track.position.get}, IsSubscribed: ${track.name.isSubscribed}")
   end iterateTracks
 
-  private def processNoteOn(msg: ShortMidiMessage): Unit = mPending.push(msg.getData1)
+  // private def processNoteOn(msg: ShortMidiMessage): Unit = mPending.push(msg.getData1)
 
   private def onMidi0(msg: ShortMidiMessage): Unit =
-    if msg.isControlChange then processControlChange(msg)
-    else if msg.isNoteOff then processNoteOff
-    else if msg.isNoteOn then processNoteOn(msg)
+    MidiProcessor.process(msg)
+    // if msg.isControlChange then processControlChange(msg)
+    // else if msg.isNoteOff then processNoteOff
+    // else if msg.isNoteOn then processNoteOn(msg)
   end onMidi0
 
   @FunctionalInterface
   private def onSysex0(data: String): Unit = ()
 
 end MidiMixExtension
+
+class VolumeChangeWatcher extends MidiEventHandler {
+  override def handleEvent(event: MidiEvent): Unit = 
+    event match 
+      case VolumeChangeEvent(track, kind, volume) =>
+        Log.send(s"Volume changed: $volume")
+      case _ =>
+}
