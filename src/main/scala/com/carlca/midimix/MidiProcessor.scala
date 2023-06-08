@@ -7,7 +7,7 @@ trait MidiEvent
 trait MidiEventHandler 
 def handleEvent(event: MidiEvent): Unit = None
 
-case class VolumeChangeEvent(track: Option[Int], kind: Option[Int], volume: Int) extends MidiEvent
+case class VolumeChangeEvent(track: Option[Int], kind: Option[Int], volume: Int) extends MidiEventHandler
 
 object MidiProcessor: 
   private var volumeChangeObserver: Option[MidiEventHandler] = None
@@ -16,5 +16,5 @@ object MidiProcessor:
     volumeChangeObserver = Some(observer)
 
   def process(msg: ShortMidiMessage): Unit =
-    if msg.isControlChange
+    if msg.isControlChange then
       volumeChangeObserver.foreach(_.handleEvent(VolumeChangeEvent(Maps.getTrack(msg), Maps.getKind(msg), msg.getData2())))

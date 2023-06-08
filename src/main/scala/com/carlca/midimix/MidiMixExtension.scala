@@ -42,7 +42,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   override def init: Unit =
     val host = getHost
     initWork(host)
-    MidiProcessor.onVolumeChanged(new VolumeChangeEvent)
+    MidiProcessor.onVolumeChanged(new VolumeChangeWatcher)
 
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
@@ -174,10 +174,9 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
 end MidiMixExtension
 
-class VolumeChangeWatcher extends MidiEventHandler {
+class VolumeChangeWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = 
     event match 
       case VolumeChangeEvent(track, kind, volume) =>
         Log.send(s"Volume changed: $volume")
       case _ =>
-}

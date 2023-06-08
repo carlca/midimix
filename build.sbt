@@ -12,5 +12,5 @@ lazy val root = (project in file("."))
     logLevel            := Level.Error,
     // showSuccess         := false,
     // showTiming          := false,
-    scalacOptions       ++= Seq("-deprecation", "-Wunused:imports,privates,locals,explicits")
+    scalacOptions       ++= Seq("-explain", "-deprecation", "-Wunused:imports,privates,locals,explicits")
   )
