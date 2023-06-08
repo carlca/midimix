@@ -2,10 +2,8 @@ package com.carlca.midimix
 
 import com.bitwig.extension.api.util.midi.ShortMidiMessage
 
-trait MidiEvent
-
-trait MidiEventHandler 
-def handleEvent(event: MidiEvent): Unit = None
+trait MidiEventHandler: 
+  def handleEvent(event: VolumeChangeEvent): Unit = None
 
 case class VolumeChangeEvent(track: Option[Int], kind: Option[Int], volume: Int) extends MidiEventHandler
 
@@ -18,3 +16,5 @@ object MidiProcessor:
   def process(msg: ShortMidiMessage): Unit =
     if msg.isControlChange then
       volumeChangeObserver.foreach(_.handleEvent(VolumeChangeEvent(Maps.getTrack(msg), Maps.getKind(msg), msg.getData2())))
+//    else if msg.isNoteOff then
+

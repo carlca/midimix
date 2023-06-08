@@ -175,8 +175,8 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 end MidiMixExtension
 
 class VolumeChangeWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = 
+  override def handleEvent(event: VolumeChangeEvent): Unit = 
     event match 
       case VolumeChangeEvent(track, kind, volume) =>
         Log.send(s"Volume changed: $volume")
-      case _ =>
+      case null =>
