@@ -7,7 +7,7 @@ enum ButtonType derives CanEqual:
   case Arm, Mute, Solo, BankLeft, BankRight
 
 enum CCKind derives CanEqual:
-  case Volume, SendA, SendB, SendC
+  case SendA, SendB, SendC, Volume, Master
 
 object Maps:
   // General Constants
@@ -93,18 +93,27 @@ object Maps:
   */ 
   private lazy val mArms: Map[Int, Int] =
     Map.from(ARMS.zipWithIndex.map((arm, index) => arm -> (index)))
+  // Helper for hetCCKind
+  private val mCCKinds: Map[Int, CCKind] = Map(SEND_A -> CCKind.SendA, SEND_B -> CCKind.SendB, SEND_C -> CCKind.SendC, 
+                                               VOLUME -> CCKind.Volume, MASTER -> CCKind.Master) 
   // static methods of the Maps object
   def getButtonType(msg: ShortMidiMessage): ButtonType =
     if Maps.getMute(msg) != None then ButtonType.Mute 
     else if Maps.getArm(msg) != None then ButtonType.Arm
     else msg.getData1 match
-      case MIDI_SOLO       => ButtonType.Solo
-      case MIDI_BANK_LEFT  => ButtonType.BankLeft
-      case MIDI_BANK_RIGHT => ButtonType.BankRight
+        case MIDI_SOLO       => ButtonType.Solo
+        case MIDI_BANK_LEFT  => ButtonType.BankLeft
+        case MIDI_BANK_RIGHT => ButtonType.BankRight
   def tracksLog: String = s"mTracks: ${SortedMap.from(mTracks).toString}"
   def kindsLog: String = s"mKinds: ${SortedMap.from(mKinds).toString}"
   def mutesLog: String = s"mMutes: ${SortedMap.from(mMutes).toString}"
   def armsLog: String = s"mArms: ${SortedMap.from(mArms).toString}"
+  def getCCKind(msg: ShortMidiMessage): Option[CCKind] = mCCKinds.get(getKind(msg).get)
+    // getKind(msg).get match 
+    //   case SEND_A => CCKind.SendA
+    //   case SEND_B => CCKind.SendB
+    //   case SEND_C => CCKind.SendC
+    //   case VOLUME => CCKind.Volume
   def getTrack(msg: ShortMidiMessage): Option[Int] = mTracks.get(msg.getData1)
   def getKind(msg: ShortMidiMessage): Option[Int] = mKinds.get(msg.getData1)
   def getMute(msg: ShortMidiMessage): Option[Int] = mMutes.get(msg.getData1)
