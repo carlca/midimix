@@ -6,10 +6,6 @@ import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.config.Config
 import com.carlca.logger.Log
-import com.carlca.utils.StringUtils
-
-import scala.collection.mutable
-import scala.collection.mutable.Stack
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
