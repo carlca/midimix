@@ -25,16 +25,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   override def init: Unit =
     val host = getHost
     initWork(host)
-    MidiProcessor.onVolumeChanged(VolumeChangedWatcher)
-    MidiProcessor.onMasterChanged(MasterChangedWatcher)
-    MidiProcessor.onSendAChanged(SendAChangedWatcher)
-    MidiProcessor.onSendBChanged(SendBChangedWatcher)
-    MidiProcessor.onSendCChanged(SendCChangedWatcher)
-    MidiProcessor.onMutePressed(MutePressedWatcher)
-    MidiProcessor.onArmPressed(ArmPressedWatcher)
-    MidiProcessor.onSoloPressed(SoloPressedWatcher)
-    MidiProcessor.onBankLeftPressed(BankLeftPressedWatcher)
-    MidiProcessor.onBankRightPressed(BankRightPressedWatcher)
 
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
@@ -103,57 +93,15 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
 end MidiMixExtension
 
-object VolumeChangedWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(track, volume) => 
-      Log.send(s"Volume changed - track: ${track.get}  volume: $volume")
-    case null =>
-
-object MasterChangedWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(_, volume) => Log.send(s"Master changed  volume: $volume")
-    case null =>
-
-object SendAChangedWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(track, volume) => Log.send(s"Send A changed - track: ${track.get}  volume: $volume")
-    case null =>
-
-object SendBChangedWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(track, volume) => Log.send(s"Send B changed - track: ${track.get}  volume: $volume")
-    case null =>
-
-object SendCChangedWatcher extends MidiEventHandler: 
-  override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(track, volume) => Log.send(s"Send C changed - track: ${track.get}  volume: $volume")
-    case null =>
-
-object MutePressedWatcher extends MidiEventHandler:
-  override def handleEvent(event: MidiEvent): Unit = event match
-    case MidiEvent(track, _) => Log.send(s"Mute pressed - track: ${track}")
-    case null =>
-
-object ArmPressedWatcher extends MidiEventHandler:
-  override def handleEvent(event: MidiEvent): Unit = event match
-    case MidiEvent(track, _) => Log.send(s"Arm pressed - track: ${track}")
-    case null =>
-
-object SoloPressedWatcher extends MidiEventHandler:
-  override def handleEvent(event: MidiEvent): Unit = event match
-    case MidiEvent(_, _) => Log.send(s"Solo All pressed")
-    case null =>
-
-object BankLeftPressedWatcher extends MidiEventHandler:
-  override def handleEvent(event: MidiEvent): Unit = event match
-    case MidiEvent(_, _) => Log.send(s"Bank Left pressed")
-    case null =>
-
-object BankRightPressedWatcher extends MidiEventHandler:
-  override def handleEvent(event: MidiEvent): Unit = event match
-    case MidiEvent(_, _) => Log.send(s"Bank Right pressed")
-    case null =>
-
 object Handler:
   def volumeChanged(e: MidiEvent): Unit = Log.send(s"Volume changed - track: ${e.track.get}  volume: ${e.volume}")
+  def sendAChanged(e: MidiEvent): Unit = Log.send(s"Send A changed - track: ${e.track.get}  volume: ${e.volume}")
+  def sendBChanged(e: MidiEvent): Unit = Log.send(s"Send B changed - track: ${e.track.get}  volume: ${e.volume}")
+  def sendCChanged(e: MidiEvent): Unit = Log.send(s"Send C changed - track: ${e.track.get}  volume: ${e.volume}")
+  def masterChanged(e: MidiEvent): Unit = Log.send(s"Master changed - volume: ${e.volume}")
+  def mutePressed(e: MidiEvent): Unit = Log.send(s"Mute pressed - track: ${e.track}")
+  def armPressed(e: MidiEvent): Unit = Log.send(s"Rec Arm pressed - track: ${e.track}")
+  def soloPressed(e: MidiEvent): Unit = Log.send("Solo All pressed")
+  def bankLeftPressed(e: MidiEvent): Unit = Log.send("Bank Left pressed")
+  def bankRightPressed(e: MidiEvent): Unit = Log.send("Bank Right pressed")
 end Handler
