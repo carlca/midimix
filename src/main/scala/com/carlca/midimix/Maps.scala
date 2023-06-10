@@ -108,12 +108,7 @@ object Maps:
   def kindsLog: String = s"mKinds: ${SortedMap.from(mKinds).toString}"
   def mutesLog: String = s"mMutes: ${SortedMap.from(mMutes).toString}"
   def armsLog: String = s"mArms: ${SortedMap.from(mArms).toString}"
-  def getCCKind(msg: ShortMidiMessage): Option[CCKind] = mCCKinds.get(getKind(msg).get)
-    // getKind(msg).get match 
-    //   case SEND_A => CCKind.SendA
-    //   case SEND_B => CCKind.SendB
-    //   case SEND_C => CCKind.SendC
-    //   case VOLUME => CCKind.Volume
+  def getCCKind(msg: ShortMidiMessage): Option[CCKind] = getKind(msg).flatMap(mCCKinds.get)
   def getTrack(msg: ShortMidiMessage): Option[Int] = mTracks.get(msg.getData1)
   def getKind(msg: ShortMidiMessage): Option[Int] = mKinds.get(msg.getData1)
   def getMute(msg: ShortMidiMessage): Option[Int] = mMutes.get(msg.getData1)

@@ -25,16 +25,16 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   override def init: Unit =
     val host = getHost
     initWork(host)
-    MidiProcessor.onVolumeChanged(new VolumeChangedWatcher)
-    MidiProcessor.onMasterChanged(new MasterChangedWatcher)
-    MidiProcessor.onSendAChanged(new SendAChangedWatcher)
-    MidiProcessor.onSendBChanged(new SendBChangedWatcher)
-    MidiProcessor.onSendCChanged(new SendCChangedWatcher)
-    MidiProcessor.onMutePressed(new MutePressedWatcher)
-    MidiProcessor.onArmPressed(new ArmPressedWatcher)
-    MidiProcessor.onSoloPressed(new SoloPressedWatcher)
-    MidiProcessor.onBankLeftPressed(new BankLeftPressedWatcher)
-    MidiProcessor.onBankRightPressed(new BankRightPressedWatcher)
+    MidiProcessor.onVolumeChanged(VolumeChangedWatcher)
+    MidiProcessor.onMasterChanged(MasterChangedWatcher)
+    MidiProcessor.onSendAChanged(SendAChangedWatcher)
+    MidiProcessor.onSendBChanged(SendBChangedWatcher)
+    MidiProcessor.onSendCChanged(SendCChangedWatcher)
+    MidiProcessor.onMutePressed(MutePressedWatcher)
+    MidiProcessor.onArmPressed(ArmPressedWatcher)
+    MidiProcessor.onSoloPressed(SoloPressedWatcher)
+    MidiProcessor.onBankLeftPressed(BankLeftPressedWatcher)
+    MidiProcessor.onBankRightPressed(BankRightPressedWatcher)
 
   private def initWork(host: ControllerHost): Unit =
     Config.init(APP_NAME)
@@ -59,7 +59,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))
 
   private def initOnSysexCallback(host: ControllerHost): Unit =
-    host.getMidiInPort(0).setSysexCallback(onSysex0)
+    host.getMidiInPort(0).setSysexCallback(onSysex0(_))
 
   private def initTransport(host: ControllerHost): Unit = mTransport = host.createTransport
 
@@ -103,52 +103,57 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
 end MidiMixExtension
 
-class VolumeChangedWatcher extends MidiEventHandler: 
+object VolumeChangedWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = event match 
-    case MidiEvent(track, volume) => Log.send(s"Volume changed - track: ${track.get}  volume: $volume")
+    case MidiEvent(track, volume) => 
+      Log.send(s"Volume changed - track: ${track.get}  volume: $volume")
     case null =>
 
-class MasterChangedWatcher extends MidiEventHandler: 
+object MasterChangedWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = event match 
     case MidiEvent(_, volume) => Log.send(s"Master changed  volume: $volume")
     case null =>
 
-class SendAChangedWatcher extends MidiEventHandler: 
+object SendAChangedWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = event match 
     case MidiEvent(track, volume) => Log.send(s"Send A changed - track: ${track.get}  volume: $volume")
     case null =>
 
-class SendBChangedWatcher extends MidiEventHandler: 
+object SendBChangedWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = event match 
     case MidiEvent(track, volume) => Log.send(s"Send B changed - track: ${track.get}  volume: $volume")
     case null =>
 
-class SendCChangedWatcher extends MidiEventHandler: 
+object SendCChangedWatcher extends MidiEventHandler: 
   override def handleEvent(event: MidiEvent): Unit = event match 
     case MidiEvent(track, volume) => Log.send(s"Send C changed - track: ${track.get}  volume: $volume")
     case null =>
 
-class MutePressedWatcher extends MidiEventHandler:
+object MutePressedWatcher extends MidiEventHandler:
   override def handleEvent(event: MidiEvent): Unit = event match
     case MidiEvent(track, _) => Log.send(s"Mute pressed - track: ${track}")
     case null =>
 
-class ArmPressedWatcher extends MidiEventHandler:
+object ArmPressedWatcher extends MidiEventHandler:
   override def handleEvent(event: MidiEvent): Unit = event match
     case MidiEvent(track, _) => Log.send(s"Arm pressed - track: ${track}")
     case null =>
 
-class SoloPressedWatcher extends MidiEventHandler:
+object SoloPressedWatcher extends MidiEventHandler:
   override def handleEvent(event: MidiEvent): Unit = event match
     case MidiEvent(_, _) => Log.send(s"Solo All pressed")
     case null =>
 
-class BankLeftPressedWatcher extends MidiEventHandler:
+object BankLeftPressedWatcher extends MidiEventHandler:
   override def handleEvent(event: MidiEvent): Unit = event match
     case MidiEvent(_, _) => Log.send(s"Bank Left pressed")
     case null =>
 
-class BankRightPressedWatcher extends MidiEventHandler:
+object BankRightPressedWatcher extends MidiEventHandler:
   override def handleEvent(event: MidiEvent): Unit = event match
     case MidiEvent(_, _) => Log.send(s"Bank Right pressed")
     case null =>
+
+object Handler:
+  def volumeChanged(e: MidiEvent): Unit = Log.send(s"Volume changed - track: ${e.track.get}  volume: ${e.volume}")
+end Handler
