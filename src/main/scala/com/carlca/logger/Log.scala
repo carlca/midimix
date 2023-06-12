@@ -11,23 +11,23 @@ object Log:
   cls
 
   def cls: Unit =
-    initSockets
-    sendMessage("\u001B[H\u001B[2J")
+    if initSockets then
+      sendMessage("\u001B[H\u001B[2J")
   end cls
 
   def blank: Unit =
-    initSockets
+    if initSockets then
+      sendMessage("")  
   end blank
 
   def line: Unit =
-    initSockets
-    val line = String.valueOf('-').repeat(80)
-    sendMessage(line)
+    if initSockets then
+      sendMessage(String.valueOf('-').repeat(80))
   end line
 
   def send(msg: String, args: Any*): Unit =
-    initSockets
-    sendMessage(String.format(msg, args))
+    if initSockets then
+      sendMessage(String.format(msg, args))
   end send
 
   private def sendMessage(msg: String): Unit =
@@ -36,12 +36,13 @@ object Log:
       writer.flush
   end sendMessage
 
-  private def initSockets: Unit =
+  private def initSockets: Boolean =
     val port = Config.getLogPort
     if port > 0 then
       socket = new Socket("localhost", port)
       val outputStream = socket.getOutputStream
       writer = new BufferedWriter(new OutputStreamWriter(outputStream))
+    port > 0
   end initSockets
 
 end Log

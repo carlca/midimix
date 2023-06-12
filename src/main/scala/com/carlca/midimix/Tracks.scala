@@ -22,6 +22,10 @@ object Tracks:
   private val MAX_SENDS:  Int             = 0x03
   private val MAX_SCENES: Int             = 0x10
 
+  // Public methods
+  def setVolume(track: Int, volume: Int): Unit = mTrackBank.getItemAt(track).volume().set(volume / 127.0)
+  def setMasterVolume(volume: Int): Unit = mMasterTrack.volume().set(volume / 127.0)
+
   // Main init method
   def init(host: ControllerHost): Unit =
     initTransport(host)
