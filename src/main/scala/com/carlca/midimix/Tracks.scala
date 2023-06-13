@@ -23,8 +23,16 @@ object Tracks:
   private val MAX_SCENES: Int             = 0x10
 
   // Public methods
-  def setVolume(track: Int, volume: Int): Unit = mTrackBank.getItemAt(track).volume().set(volume / 127.0)
-  def setMasterVolume(volume: Int): Unit = mMasterTrack.volume().set(volume / 127.0)
+  def setVolume(t: Int, v: Int): Unit = mTrackBank.getItemAt(t).volume().set(v / 127.0)
+  def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
+  def setSendA(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
+  def setSendB(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
+  def setSendC(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
+  def setMute(t: Int): Unit = mTrackBank.getItemAt(t).mute().toggle()
+  def setArm(t: Int): Unit = mTrackBank.getItemAt(t).arm().toggle()
+  def setSolo: Unit =      ??? // mTrackBank.getItemAt(track).solo().set(state)
+  def setBankLeft: Unit =  ??? // mTrackBank.scrollTracksUp()
+  def setBankRight: Unit = ??? // mTrackBank.scrollTracksDown()
 
   // Main init method
   def init(host: ControllerHost): Unit =
@@ -60,6 +68,9 @@ object Tracks:
       track.trackType.markInterested
       track.position.markInterested
       track.exists.markInterested
+      track.mute.markInterested
+      track.solo.markInterested
+      track.arm.markInterested
       val parent = track.createParentTrack(0, 0)
       parent.name.markInterested
   end initInterest
