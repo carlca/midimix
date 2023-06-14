@@ -18,10 +18,10 @@ object EventHandler:
   def armPressed(e: MidiEvent): Unit = 
     Log.send(e.toString); Tracks.setArm(e.track)
   def soloPressed(e: MidiEvent): Unit = 
-    Log.send(e.toString); Tracks.setSolo()
+    Log.send(e.toString); Tracks.setSolo
   def bankLeftPressed(e: MidiEvent): Unit = 
-    Log.send(e.toString); Tracks.setBankLeft()
+    Log.send(e.toString); Tracks.setBankLeft
   def bankRightPressed(e: MidiEvent): Unit = 
-    Log.send(e.toString); Tracks.setBankRight()
+    Log.send(e.toString); Tracks.setBankRight
 end EventHandler  
 

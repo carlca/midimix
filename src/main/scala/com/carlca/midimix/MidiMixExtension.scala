@@ -24,7 +24,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     initEvents(host)
   override def exit: Unit = Log.send("MidiMix Exited")
 
-  override def flush: Unit = ()
+  override def flush: Unit = MidiMixLights.flushLights
 
   private def initEvents(host: ControllerHost): Unit =
     initOnMidiCallback(host)
