@@ -13,6 +13,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   override def init: Unit =
     val host = getHost
+    MidiMixLights.init(host)
     Config.init(APP_NAME)
     Log.cls
     Log.send(Maps.tracksLog)
@@ -24,7 +25,8 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     initEvents(host)
   override def exit: Unit = Log.send("MidiMix Exited")
 
-  override def flush: Unit = MidiMixLights.flushLights
+  override def flush: Unit = 
+    MidiMixLights.flushLights
 
   private def initEvents(host: ControllerHost): Unit =
     initOnMidiCallback(host)

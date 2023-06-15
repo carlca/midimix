@@ -1,7 +1,11 @@
 package com.carlca.midimix
 
-object MidiMixLights: 
+import com.bitwig.extension.controller.api.*
+
+object MidiMixLights:
+  var mHost: ControllerHost = null
+
+  def init(host: ControllerHost): Unit =
+    mHost = host
   def flushLights: Unit = flushArmLights
-  def flushArmLights: Unit = (0 to 7).foreach(t => flushArmLight(t))
-  def flushArmLight(t: Int): Unit = None
-end MidiMixLights
+  def flushArmLights: Unit = (0 to 7).foreach (t => Tracks.flushArmLight(mHost, t))

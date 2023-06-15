@@ -16,7 +16,7 @@ object EventHandler:
   def mutePressed(e: MidiEvent): Unit =
     Log.send(e.toString); Tracks.setMute(e.track)
   def armPressed(e: MidiEvent): Unit = 
-    Log.send(e.toString); Tracks.setArm(e.track)
+    Log.send(e.toString); Tracks.toggleArm(e.track)
   def soloPressed(e: MidiEvent): Unit = 
     Log.send(e.toString); Tracks.setSolo
   def bankLeftPressed(e: MidiEvent): Unit = 

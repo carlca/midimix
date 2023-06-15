@@ -2,6 +2,7 @@ package com.carlca.midimix
 
 import com.bitwig.extension.api.util.midi.ShortMidiMessage;
 import scala.collection.SortedMap
+import com.carlca.logger.Log
 
 enum ButtonType derives CanEqual:
   case Arm, Mute, Solo, BankLeft, BankRight
@@ -22,7 +23,8 @@ object Maps:
  /** mMutes: Map[Int, Int] - MidiNumber => TrackNumber for mutes */ 
   private lazy val mMutes: Map[Int, Int] = Map.from(MUTES.zipWithIndex.map((mute, index) => mute -> (index)))
  /** mArms: Map[Int, Int] - MidiNumber => TrackNumber for arms */ 
-  private lazy val mArms: Map[Int, Int] = Map.from(ARMS.zipWithIndex.map((arm, index) => arm -> (index)))
+  private lazy val mArms: Map[Int, Int] = 
+    Map.from(ARMS.zipWithIndex.map((arm, index) => arm -> (index)))
   // Helper for getCCKind
   private val mCCKinds: Map[Int, CCKind] = 
     Map(K_A -> CCKind.SendA, K_B -> CCKind.SendB, K_C -> CCKind.SendC, K_V -> CCKind.Volume, K_M -> CCKind.Master) 
@@ -43,4 +45,5 @@ object Maps:
   def getKind(msg: ShortMidiMessage): Option[Int] = mKinds.get(msg.getData1)
   def getMute(msg: ShortMidiMessage): Option[Int] = mMutes.get(msg.getData1)
   def getArm(msg: ShortMidiMessage): Option[Int] = mArms.get(msg.getData1)
+  def getArmMidi(t: Int): Option[Int] = mArms.map(_.swap).get(t)    
 end Maps

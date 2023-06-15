@@ -23,18 +23,19 @@ object Tracks:
   private val MAX_SCENES: Int             = 0x10
 
   // Public methods
+  def getIsArmed(t: Int): Boolean = mTrackBank.getItemAt(t).arm().get()
   def setVolume(t: Int, v: Int): Unit = mTrackBank.getItemAt(t).volume().set(v / 127.0)
   def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
   def setSendA(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
   def setSendB(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
   def setSendC(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
   def setMute(t: Int): Unit = mTrackBank.getItemAt(t).mute().toggle()
-  def setArm(t: Int): Unit = mTrackBank.getItemAt(t).arm().toggle()
-  def setSolo: Unit =      ??? // mTrackBank.getItemAt(track).solo().set(state)
-  def setBankLeft: Unit =  ??? // mTrackBank.scrollTracksUp()
-  def setBankRight: Unit = ??? // mTrackBank.scrollTracksDown()
-
-  // Main init method
+  def toggleArm(t: Int): Unit = mTrackBank.getItemAt(t).arm().toggle()
+  def setSolo: Unit = ()
+  def setBankLeft: Unit = () // mTrackBank.scrollTracksUp()
+  def setBankRight: Unit = () // mTrackBank.scrollTracksDown()
+  def flushArmLight(host: ControllerHost, t: Int): Unit = 
+    host.getMidiOutPort(0).sendMidi(144, Maps.getArmMidi(t).get, if getIsArmed(t) then 0x7F else 0x00);
   def init(host: ControllerHost): Unit =
     initTransport(host)
     initTrackBanks(host)
