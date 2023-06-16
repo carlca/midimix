@@ -20,13 +20,17 @@ object MidiProcessor:
         case SendC     => sendCChanged(eCC)
         case Volume    => volumeChanged(eCC)
         case Master    => masterChanged(eCC)
-    else if msg.isNoteOff then
+    else
       val buttonType = Maps.getButtonType(msg)
       val e0: MidiEvent = MidiEvent(0, 0, buttonType.toString)
-      buttonType match 
-        case Mute      => mutePressed(makeMuteEvent(msg, buttonType.toString))
-        case Arm       => armPressed(makeArmEvent(msg, buttonType.toString))
-        case Solo      => soloPressed(e0)
-        case BankLeft  => bankLeftPressed(e0)
-        case BankRight => bankRightPressed(e0)
+      if msg.isNoteOn then
+        if buttonType == Solo then soloPressed(e0)
+      else
+        if msg.isNoteOff then
+          buttonType match 
+            case Mute      => mutePressed(makeMuteEvent(msg, buttonType.toString))
+            case Arm       => armPressed(makeArmEvent(msg, buttonType.toString))
+            case Solo      => soloReleased(e0)
+            case BankLeft  => bankLeftPressed(e0)
+            case BankRight => bankRightPressed(e0)
         
