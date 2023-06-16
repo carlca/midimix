@@ -19,6 +19,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     Log.send(Maps.tracksLog)
     Log.send(Maps.kindsLog)
     Log.send(Maps.mutesLog)
+    Log.send(Maps.solosLog)
     Log.send(Maps.armsLog)
     Log.line
     Tracks.init(host)

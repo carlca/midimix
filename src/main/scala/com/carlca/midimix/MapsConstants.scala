@@ -2,7 +2,7 @@ package com.carlca.midimix
 
 object MapsConstants:
   // MIDI Constants
-  val M_MAST: Int = 0x3e; val M_LEFT: Int = 0x19; val M_RIGHT: Int = 0x1A; val M_SOLO: Int = 0x1B
+  val M_MAST: Int = 0x3e; val M_LEFT: Int = 0x19; val M_RIGHT: Int = 0x1A; val M_SOLO_MODE: Int = 0x1B
   // Kind Constants - K_A = Send A, K_B = Send B, K_C = Send C, K_V = Volume, K_M = Master
   val K_A: Int = 0; val K_B: Int = 1; val K_C: Int = 2; val K_V: Int = 3; val K_M: Int = 0xff
   // Tracks Constants 

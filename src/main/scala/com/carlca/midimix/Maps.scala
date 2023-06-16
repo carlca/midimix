@@ -5,7 +5,7 @@ import scala.collection.SortedMap
 import com.carlca.logger.Log
 
 enum ButtonType derives CanEqual:
-  case Arm, Mute, Solo, BankLeft, BankRight
+  case Arm, Mute, Solo, SoloMode, BankLeft, BankRight
 
 enum CCKind derives CanEqual:
   case SendA, SendB, SendC, Volume, Master
@@ -39,13 +39,13 @@ object Maps:
  
  /** static methods of the Maps object */
   def getButtonType(msg: ShortMidiMessage): ButtonType =
-    Log.send(s"msg.getData1: ${msg.getData1.toString}")    
-    if Maps.getMute(msg)      != None then ButtonType.Mute 
-    else if Maps.getArm(msg)  != None then ButtonType.Arm
-    else msg.getData1 match
-        case M_SOLO  => ButtonType.Solo
-        case M_LEFT  => ButtonType.BankLeft
-        case M_RIGHT => ButtonType.BankRight
+    msg.getData1 match
+      case data if MUTES.contains(data) => ButtonType.Mute
+      case data if SOLOS.contains(data) => ButtonType.Solo
+      case data if ARMS.contains(data)  => ButtonType.Arm
+      case M_SOLO_MODE                  => ButtonType.SoloMode
+      case M_LEFT                       => ButtonType.BankLeft
+      case M_RIGHT                      => ButtonType.BankRight
 
  /** Logging methods */       
   def tracksLog: String = s"mTracks: ${SortedMap.from(mTracks).toString}"
@@ -62,5 +62,6 @@ object Maps:
   def getSolo(msg: ShortMidiMessage): Option[Int] = mSolos.get(msg.getData1)
   def getArm(msg: ShortMidiMessage): Option[Int] = mArms.get(msg.getData1)
   def getMuteMidi(t: Int): Option[Int] = mMutes.map(_.swap).get(t)
+  def getSoloMidi(t: Int): Option[Int] = mSolos.map(_.swap).get(t)
   def getArmMidi(t: Int): Option[Int] = mArms.map(_.swap).get(t)    
 end Maps

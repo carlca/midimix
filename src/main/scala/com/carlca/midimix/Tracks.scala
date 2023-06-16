@@ -54,17 +54,9 @@ object Tracks:
   def toggleSolo(t: Int): Unit = mTrackBank.getItemAt(t).solo().toggle()
 
  /** Set bank methods */ 
-  def setBankLeft: Unit = () // mTrackBank.scrollTracksUp()
-  def setBankRight: Unit = () // mTrackBank.scrollTracksDown()
+  def setBankLeft: Unit = ()
+  def setBankRight: Unit = ()
 
-  // Mute and Solo share the same track buttons - Mode is determined by SOLO button - UP = Mute, DOWN - Solo
-  def flushMuteLight(t: Int): Unit = 
-    mHost.getMidiOutPort(0).sendMidi(0x90, Maps.getMuteMidi(t).get, if getIsMuted(t) then 0x7F else 0x00);
-  def flushSoloLight(t: Int): Unit = 
-    mHost.getMidiOutPort(0).sendMidi(0x90, Maps.getMuteMidi(t).get, if getIsSolo(t) then 0x7F else 0x00);
-  def flushArmLight(t: Int): Unit = 
-    mHost.getMidiOutPort(0).sendMidi(0x90, Maps.getArmMidi(t).get, if getIsArmed(t) then 0x7F else 0x00);
-  
  /** Init methods called from MidiMixExtension.init - code must be run from init */  
   private def initTransport: Unit = mTransport = mHost.createTransport
   private def initTrackBanks: Unit =

@@ -8,6 +8,7 @@ object MidiProcessor:
   import CCKind.*
   import ButtonType.*
   def makeMuteEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getMute(msg).get, 0, Mute.toString)
+  def makeSoloEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getSolo(msg).get, 0, Solo.toString)
   def makeArmEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getArm(msg).get, 0, Arm.toString)
   def process(msg: ShortMidiMessage): Unit =
     import EventHandler.*
@@ -24,13 +25,14 @@ object MidiProcessor:
       val buttonType = Maps.getButtonType(msg)
       val e0: MidiEvent = MidiEvent(0, 0, buttonType.toString)
       if msg.isNoteOn then
-        if buttonType == Solo then soloPressed(e0)
+        if buttonType == SoloMode then soloDown(e0)
       else
         if msg.isNoteOff then
           buttonType match 
             case Mute      => mutePressed(makeMuteEvent(msg, buttonType.toString))
             case Arm       => armPressed(makeArmEvent(msg, buttonType.toString))
-            case Solo      => soloReleased(e0)
+            case Solo      => soloPressed(makeSoloEvent(msg, buttonType.toString))
+            case SoloMode  => soloUp(e0)
             case BankLeft  => bankLeftPressed(e0)
             case BankRight => bankRightPressed(e0)
         
