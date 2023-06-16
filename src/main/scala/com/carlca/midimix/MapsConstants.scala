@@ -22,5 +22,6 @@ object MapsConstants:
   val A5: Int = 0x0F; val A6: Int = 0x12; val A7: Int = 0x15; val A8: Int = 0x18
   val ARMS:  Seq[Int]  = Seq(A1, A2, A3, A4, A5, A6, A7, A8)
 end MapsConstants
+
   
 

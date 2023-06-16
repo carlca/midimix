@@ -26,7 +26,7 @@ object Tracks:
   private val MAX_SENDS:  Int       = 0x03
   private val MAX_SCENES: Int       = 0x10
 
- /** Init method */
+ /** init method */
   def init(host: ControllerHost) = 
     mHost = host
     initTransport
@@ -57,8 +57,11 @@ object Tracks:
   def setBankLeft: Unit = ()
   def setBankRight: Unit = ()
 
- /** Init methods called from MidiMixExtension.init - code must be run from init */  
+ /** Init methods called from MidiMixExtension.init - code must be run from init 
+  * initTransport */  
   private def initTransport: Unit = mTransport = mHost.createTransport
+
+ /** initTrackBanks */ 
   private def initTrackBanks: Unit =
     mTrackBank = mHost.createTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
     mMainTrackBank = mHost.createMainTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
@@ -67,8 +70,12 @@ object Tracks:
     initInterest(mMainTrackBank)
     initInterest(mEffectTrackBank)
   end initTrackBanks
+
+ /** initMasterTrack */
   private def initMasterTrack: Unit =
     mMasterTrack = mHost.createMasterTrack(0)
+    
+ /** initInterest */   
   private def initInterest(bank: TrackBank): Unit =
     bank.itemCount.markInterested
     bank.channelCount.markInterested
@@ -87,9 +94,7 @@ object Tracks:
       val parent = track.createParentTrack(0, 0)
       parent.name.markInterested
   end initInterest
+
+ /** initCursorTrack */ 
   private def initCursorTrack: Unit =
     mCursorTrack = mHost.createCursorTrack(1, 0)
-
-
-
-
