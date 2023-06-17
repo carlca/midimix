@@ -28,4 +28,5 @@ project/target/
 .vscode/
 .bloop/
 .bsp/
+Dump/
 metals.sbt

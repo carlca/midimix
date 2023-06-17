@@ -33,10 +33,10 @@ object EventHandler:
     Log.send(e.toString); Tracks.toggleSolo(e.track)
 
   def soloDown(e: MidiEvent): Unit =
-    Log.send(e.toString); mMode = ButtonMode.Solo; MidiMixLights.flushLights
+    Log.send(e.toString); mMode = ButtonMode.Solo; 
 
   def soloUp(e: MidiEvent): Unit =
-    Log.send(e.toString); mMode = ButtonMode.Mute; MidiMixLights.flushLights
+    Log.send(e.toString); mMode = ButtonMode.Mute; 
 
   def armPressed(e: MidiEvent): Unit = 
     Log.send(e.toString); Tracks.toggleArm(e.track)

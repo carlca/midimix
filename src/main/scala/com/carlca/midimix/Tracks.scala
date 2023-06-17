@@ -48,10 +48,10 @@ object Tracks:
   def setSendB(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
   def setSendC(t: Int, s: Int, v: Int): Unit = mTrackBank.getItemAt(t).sendBank().getItemAt(s).set(v / 127.0)
 
- /** Set send methods */   
+ /** Toggle methods */   
   def toggleMute(t: Int): Unit = mTrackBank.getItemAt(t).mute().toggle()
   def toggleArm(t: Int): Unit = mTrackBank.getItemAt(t).arm().toggle()
-  def toggleSolo(t: Int): Unit = mTrackBank.getItemAt(t).solo().toggle()
+  def toggleSolo(t: Int): Unit = mTrackBank.getItemAt(t).solo().toggleUsingPreferences(false)
 
  /** Set bank methods */ 
   def setBankLeft: Unit = ()
