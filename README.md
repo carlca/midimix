@@ -1,3 +1,2 @@
 # midimix
-
-Branch-to-try-minortms-fp
+Bitwig Studio extension for the Akai MIDImix.
