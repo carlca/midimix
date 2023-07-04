@@ -6,6 +6,7 @@ import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.config.Config
 import com.carlca.logger.Log
+import com.carlca.midimix.Preferences
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
@@ -15,7 +16,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     val host = getHost
     MidiMixLights.init(host)
     Config.init(APP_NAME)
-    MidiMixPreferences.init(host)
+    Preferences.init(host)
     Log.cls
     Log.send(Maps.tracksLog)
     Log.send(Maps.kindsLog)
