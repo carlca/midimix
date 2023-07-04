@@ -15,6 +15,7 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     val host = getHost
     MidiMixLights.init(host)
     Config.init(APP_NAME)
+    MidiMixPreferences.init(host)
     Log.cls
     Log.send(Maps.tracksLog)
     Log.send(Maps.kindsLog)

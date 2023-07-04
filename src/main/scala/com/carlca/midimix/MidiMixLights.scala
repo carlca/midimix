@@ -1,7 +1,6 @@
 package com.carlca.midimix
 
 import com.bitwig.extension.controller.api.*
-import com.carlca.logger.Log
 
 object MidiMixLights:
   var mHost: ControllerHost = null

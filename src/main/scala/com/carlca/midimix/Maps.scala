@@ -2,7 +2,6 @@ package com.carlca.midimix
 
 import com.bitwig.extension.api.util.midi.ShortMidiMessage;
 import scala.collection.SortedMap
-import com.carlca.logger.Log
 
 enum ButtonType derives CanEqual:
   case Arm, Mute, Solo, SoloMode, BankLeft, BankRight
