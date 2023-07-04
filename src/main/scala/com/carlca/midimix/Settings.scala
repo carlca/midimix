@@ -2,7 +2,7 @@ package com.carlca.midimix
 
 import com.bitwig.extension.controller.api.*
 
-object Preferences: 
+object Settings: 
   enum PanSendMode derives CanEqual:
     case `FX Send`, `Pan`
 
@@ -16,10 +16,10 @@ object Preferences:
     var prefs = host.getPreferences
 
     var soloSetting = prefs.getBooleanSetting("Exclusive Solo", "Solo Behaviour", false)
-    soloSetting.addValueObserver((value) => Preferences.exclusiveSolo = value)
+    soloSetting.addValueObserver((value) => Settings.exclusiveSolo = value)
 
     var values = PanSendMode.values.map(_.toString).toArray
     var panSetting = prefs.getEnumSetting("Send/Pan Mode", "Third Row Behaviour", values, PanSendMode.`FX Send`.toString())
-    panSetting.addValueObserver((value) => Preferences.panSendMode = PanSendMode.valueOf(value))
+    panSetting.addValueObserver((value) => Settings.panSendMode = PanSendMode.valueOf(value))
 
 
