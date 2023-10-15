@@ -37,6 +37,7 @@ object Log:
   end sendMessage
 
   private def initSockets: Boolean =
+    return false
     val port = Config.getLogPort
     if port > 0 then
       socket = new Socket("localhost", port)
