@@ -7,14 +7,14 @@ case class MidiEvent(track: Int, volume: Int, sort: String)
 object MidiProcessor: 
   import CCKind.*
   import ButtonType.*
-  def makeMuteEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getMute(msg).get, 0, Mute.toString)
-  def makeSoloEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getSolo(msg).get, 0, Solo.toString)
-  def makeArmEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getArm(msg).get, 0, Arm.toString)
+  private def makeMuteEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getMute(msg).get, 0, Mute.toString)
+  private def makeSoloEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getSolo(msg).get, 0, Solo.toString)
+  private def makeArmEvent(msg: ShortMidiMessage, sort: String): MidiEvent = MidiEvent(Maps.getArm(msg).get, 0, Arm.toString)
   def process(msg: ShortMidiMessage): Unit =
     import EventHandler.*
     if msg.isControlChange then
       val kind = Maps.getCCKind(msg).get 
-      val eCC: MidiEvent = MidiEvent(Maps.getTrack(msg).get, msg.getData2(), kind.toString)
+      val eCC: MidiEvent = MidiEvent(Maps.getTrack(msg).get, msg.getData2, kind.toString)
       kind match
         case SendA     => sendAChanged(eCC)
         case SendB     => sendBChanged(eCC)
