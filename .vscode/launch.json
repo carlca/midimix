@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "type": "scala",
+      "request": "launch",
+      "name": "Debug",
+      "mainClass": "com.carlca.midimix.MidiMixExtension",
+      "jvmOptions": ["-Xmx1G"]
+    }
+  ]
+}
