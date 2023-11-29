@@ -5,6 +5,7 @@ import com.bitwig.extension.controller.api.*
 import com.carlca.midimix.Settings
 import com.carlca.midimix.Settings.TrackMode
 import com.carlca.logger.Log
+import com.carlca.logger.LogTest
 
 class TrackBankWrapper(val trackBank: TrackBank): 
  
@@ -25,6 +26,7 @@ class TrackBankWrapper(val trackBank: TrackBank):
         idx = idx + 1
     for i <- idx until trackBank.getCapacityOfBank do
       tracksMap = tracksMap + (i -> None)
+    Log2.line.send("Hello from getTracks").blank.line  
     tracksMap
   end getTracks
 
