@@ -17,16 +17,9 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 		MidiMixLights.init(host)
 		Config.init(APP_NAME)
 		Settings.init(host)
-		Log.cls
-		Log.send(Maps.tracksLog)
-		Log.send(Maps.kindsLog)
-		Log.send(Maps.mutesLog)
-		Log.send(Maps.solosLog)
-		Log.send(Maps.armsLog)
-		Log.line
 		Tracks.init(host)
 		initEvents(host)
-	override def exit: Unit = Log.send("MidiMix Exited")
+	override def exit: Unit = None
 
 	override def flush: Unit = 
 		MidiMixLights.flushLights
