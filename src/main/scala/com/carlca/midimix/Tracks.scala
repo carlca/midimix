@@ -1,11 +1,9 @@
 package com.carlca.midimix
 
-import scala.util.control.Breaks._
 import com.bitwig.extension.controller.api.*
 import com.carlca.midimix.Settings
 import com.carlca.midimix.Settings.TrackMode
 import com.carlca.logger.Log
-import com.carlca.logger.LogTest
 
 class TrackBankWrapper(val trackBank: TrackBank): 
  
@@ -21,25 +19,16 @@ class TrackBankWrapper(val trackBank: TrackBank):
     var idx = 0
     for i <- 0 until trackBank.getCapacityOfBank do
       val track = trackBank.getItemAt(i)
-      if (track.isGroup.get == condition) && track.isActivated.get then // isActivated(track) then
+      if (track.isGroup.get == condition) && isActivated(i) then // track.isActivated.get then 
         tracksMap = tracksMap + (idx -> Some(track))
         idx = idx + 1
     for i <- idx until trackBank.getCapacityOfBank do
       tracksMap = tracksMap + (i -> None)
-    Log2.line.send("Hello from getTracks").blank.line  
     tracksMap
   end getTracks
 
-  def isActivated(track: Track): Boolean =
-    if !track.isActivated.get then
-      return false
-    var checkTrack = track.createParentTrack(0, 0)
-    while checkTrack.isGroup.get do
-      if !checkTrack.isActivated.get then
-        return false
-      checkTrack = checkTrack.createParentTrack(0, 0)
-    true
-  end isActivated
+  def isActivated(trackIndex: Int): Boolean = 
+    !Tracks.getBankAncestors(trackIndex).exists(t => t.exists.get() && !t.isActivated.get())
 
   def scrollPageBackwards(): Unit = trackBank.scrollPageBackwards()
   def scrollPageForwards(): Unit  = trackBank.scrollPageForwards()
@@ -48,40 +37,40 @@ end TrackBankWrapper
 object Tracks:
  
  /** Class instances */ 
-  private var mHost: ControllerHost       = null
-  private var mTransport: Transport       = null
-  private var mTrackBank: TrackBank       = null
-  private var mMainTrackBank: TrackBank   = null
-  private var mEffectTrackBank: TrackBank = null
-  private var mMasterTrack: Track         = null
-  private var mCursorTrack: CursorTrack   = null
-  private var mWrapper: TrackBankWrapper  = null
+  private var mHost: ControllerHost                  = null
+  private var mTransport: Transport                  = null
+  private var mTrackBank: TrackBank                  = null
+  private var mMainTrackBank: TrackBank              = null
+  private var mEffectTrackBank: TrackBank            = null  
+  private var mMasterTrack: Track                    = null
+  private var mCursorTrack: CursorTrack              = null
+  private var mWrapper: TrackBankWrapper             = null
+  private var mBankAncestors: IndexedSeq[Seq[Track]] = null
   
  /** Property methods */
-  def getTransport: Transport       = mTransport
-  def getTrackBank: TrackBank       = mTrackBank  
-  def getMainTrackBank: TrackBank   = mMainTrackBank
-  def getEffectTrackBank: TrackBank = mEffectTrackBank
-  def getMasterTrack: Track         = mMasterTrack
-  def getCursorTrack: CursorTrack   = mCursorTrack
+  def getTransport: Transport                  = mTransport
+  def getTrackBank: TrackBank                  = mTrackBank  
+  def getMainTrackBank: TrackBank              = mMainTrackBank
+  def getEffectTrackBank: TrackBank            = mEffectTrackBank  
+  def getMasterTrack: Track                    = mMasterTrack
+  def getCursorTrack: CursorTrack              = mCursorTrack
+  def getBankAncestors: IndexedSeq[Seq[Track]] = mBankAncestors
 
  /** Consts */
   private val MAX_TRACKS: Int       = 0x10
   private val MAX_SENDS:  Int       = 0x03
   private val MAX_SCENES: Int       = 0x10
+  private val MAX_ANCESTORS: Int    = 0x10
 
  /** init method */
   def init(host: ControllerHost): Unit =
-    Log.line
-    Log.send("Tracks.init")
-    Log.time
-    Log.line
     mHost = host
     initTransport
     initTrackBanks
     initMasterTrack
     initCursorTrack
     mWrapper = new TrackBankWrapper(mTrackBank)
+  end init
 
  /** Property methods */   
   def getIsMuted(t: Int): Boolean = 
@@ -132,13 +121,16 @@ object Tracks:
     initInterest(mTrackBank)
     initInterest(mMainTrackBank)
     initInterest(mEffectTrackBank)
+    initAncestors
+    initAncestorInterest
   end initTrackBanks
 
  /** initMasterTrack */
   private def initMasterTrack: Unit =
     mMasterTrack = mHost.createMasterTrack(0)
     mMasterTrack.name.markInterested
-    
+  end initMasterTrack
+
  /** initInterest */   
   private def initInterest(bank: TrackBank): Unit =
     bank.itemCount.markInterested
@@ -159,6 +151,26 @@ object Tracks:
       val parent = track.createParentTrack(0, 0)
       parent.name.markInterested
   end initInterest
+
+ /** ancestors */ 
+  def ancestors(track: Track): Seq[Track] =
+    var res = List(track)
+    for i <- 0 until MAX_ANCESTORS do
+      res = res :+ res.last.createParentTrack(0, 0)
+    res.toSeq
+
+//  /** Track parent proxies */
+//   lazy val bankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
+
+  /** initAncestors */ 
+  private def initAncestors: Unit =
+    mBankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
+
+ /** initAncestorInterest */ 
+  private def initAncestorInterest: Unit =
+    for ba <- mBankAncestors; t <- ba do
+      t.exists.markInterested()
+      t.isActivated.markInterested()
 
  /** initCursorTrack */ 
   private def initCursorTrack: Unit =

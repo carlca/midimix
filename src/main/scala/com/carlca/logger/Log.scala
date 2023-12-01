@@ -9,52 +9,61 @@ import config.Config
 import config.OS
 
 object Log:
-  private var writer: BufferedWriter = _
-  private[logger] var socket: Socket = _
+  private var writer: Option[BufferedWriter] = _
+  private[logger] var socket: Option[Socket] = _
   cls
 
-  def cls: Unit =
+  def cls: this.type =
     if initSockets then
-      sendMessage("\u001B[H\u001B[2J")
+      sendMessage("\u001B[H\u001B[2J").closeSockets
+    this  
   end cls
 
-  def blank: Unit =
+  def blank: this.type =
     if initSockets then
-      sendMessage("")  
+      sendMessage("").closeSockets
+    this
   end blank
 
-  def line: Unit =
+  def line: this.type =
     if initSockets then
-      sendMessage(String.valueOf('-').repeat(80))
+      sendMessage(String.valueOf('-').repeat(80)).closeSockets
+    this        
   end line
 
-  def time: Unit =
+  def time: this.type =
     if initSockets then
       val time = LocalTime.now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-      sendMessage(time)
+      sendMessage(time).closeSockets
+    this        
   end time
 
-  def send(msg: String, args: Any*): Unit =
+  def send(msg: String, args: Any*): this.type =
     if initSockets then
-      sendMessage(String.format(msg, args))
+      sendMessage(String.format(msg, args)).closeSockets
+    this        
   end send
 
-  private def sendMessage(msg: String): Unit =
+  private def sendMessage(msg: String): this.type =
     if writer != null then
-      writer.write(msg + System.lineSeparator)
-      writer.flush
-      writer.close
+      writer.get.write(msg + System.lineSeparator)
+      writer.get.flush()
+    this  
   end sendMessage
 
   private def initSockets: Boolean =
-    // return false
     if Config.getOs == OS.WINDOWS then return false
     val port = Config.getLogPort
     if port > 0 then                   
-      socket = new Socket("localhost", port)
-      val outputStream = socket.getOutputStream
-      writer = new BufferedWriter(new OutputStreamWriter(outputStream))
+      socket = Some(new Socket("localhost", port))
+      val outputStream = socket.get.getOutputStream
+      writer = Some(new BufferedWriter(new OutputStreamWriter(outputStream)))
     port > 0
   end initSockets
+
+  private def closeSockets: Unit =
+    writer = writer.map(_.close()).map(_ => null).getOrElse(null)
+    socket = socket.map(_.close()).map(_ => null).getOrElse(null)
+  end closeSockets
 
 end Log
