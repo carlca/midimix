@@ -9,38 +9,21 @@ import config.Config
 import config.OS
 
 object Log:
-  private var writer: Option[BufferedWriter] = _
-  private[logger] var socket: Option[Socket] = _
+  private var writer: Option[BufferedWriter] = None
+  private[logger] var socket: Option[Socket] = None
   cls
 
-  def cls: this.type =
-    if initSockets then
-      sendMessage("\u001B[H\u001B[2J").closeSockets
-    this  
-  end cls
+  def cls: this.type = send("\u001B[H\u001B[2J")
 
-  def blank: this.type =
-    if initSockets then
-      sendMessage("").closeSockets
-    this
-  end blank
+  def blank: this.type = send("")
 
-  def line: this.type =
-    if initSockets then
-      sendMessage(String.valueOf('-').repeat(80)).closeSockets
-    this        
-  end line
+  def line: this.type = send(String.valueOf('-').repeat(80))
 
-  def time: this.type =
-    if initSockets then
-      val time = LocalTime.now.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-      sendMessage(time).closeSockets
-    this        
-  end time
+  def time: this.type = send(LocalTime.now.format(DateTimeFormatter.ofPattern("HH:mm:ss")))
 
   def send(msg: String, args: Any*): this.type =
     if initSockets then
-      sendMessage(String.format(msg, args)).closeSockets
+      sendMessage(if (args.isEmpty) msg else s"$msg: ${args.mkString(", ")}").closeSockets
     this        
   end send
 
@@ -62,8 +45,9 @@ object Log:
   end initSockets
 
   private def closeSockets: Unit =
-    writer = writer.map(_.close()).map(_ => null).getOrElse(null)
-    socket = socket.map(_.close()).map(_ => null).getOrElse(null)
+    socket = socket.map(_.close()).map(_ => None).getOrElse(None)
+    writer = writer.map(_.close()).map(_ => None).getOrElse(None)
+    // writer.foreach(_.close())
   end closeSockets
 
 end Log

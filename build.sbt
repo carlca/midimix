@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
     name                := "MidiMix",
     resolvers           += "Bitwig Maven Repository" at "https://maven.bitwig.com",
     libraryDependencies += "com.bitwig" % "extension-api" % "18" % "provided",
-    libraryDependencies += "org.json"   % "json"          % "20230227",
+    libraryDependencies += "org.json"   % "json"          % "20231013",
     logLevel            := Level.Error,
     scalacOptions       ++= Seq("-deprecation", "-Wunused:imports,privates,locals,explicits")
   )

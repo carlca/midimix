@@ -6,7 +6,7 @@ object Settings:
   enum PanSendMode derives CanEqual:
     case `FX Send`, `Pan`
   enum TrackMode derives CanEqual:
-    case `One to One`, `No Groups`, `Groups Only`
+    case `One to One`, `No Groups`, `Groups Only`, `Tagged "<>" Only`
 
   var exclusiveSolo: Boolean = false
   var panSendMode: PanSendMode = PanSendMode.`FX Send`
@@ -16,16 +16,16 @@ object Settings:
     initPreferences(host)
   
   def initPreferences(host: ControllerHost): Unit = 
-    var prefs = host.getPreferences
+    val prefs = host.getPreferences
 
-    var soloSetting = prefs.getBooleanSetting("Exclusive Solo", "Solo Behaviour", false)
+    val soloSetting = prefs.getBooleanSetting("Exclusive Solo", "Solo Behaviour", false)
     soloSetting.addValueObserver((value) => Settings.exclusiveSolo = value)
 
-    var values = PanSendMode.values.map(_.toString).toArray
-    var panSetting = prefs.getEnumSetting("Send/Pan Mode", "Third Row Behaviour", values, PanSendMode.`FX Send`.toString())
+    val values = PanSendMode.values.map(_.toString).toArray
+    val panSetting = prefs.getEnumSetting("Send/Pan Mode", "Third Row Behaviour", values, PanSendMode.`FX Send`.toString())
     panSetting.addValueObserver((value) => Settings.panSendMode = PanSendMode.valueOf(value))
 
-    var trackModes = TrackMode.values.map(_.toString).toArray
-    var trackSetting = prefs.getEnumSetting("Track Mode", "Track Mapping Behaviour", trackModes, TrackMode.`One to One`.toString())
+    val trackModes = TrackMode.values.map(_.toString).toArray
+    val trackSetting = prefs.getEnumSetting("Track Mode", "Track Mapping Behaviour", trackModes, TrackMode.`One to One`.toString())
     trackSetting.addValueObserver((value) => Settings.trackMode = TrackMode.valueOf(value))
 

@@ -8,24 +8,30 @@ import com.carlca.logger.Log
 class TrackBankWrapper(val trackBank: TrackBank): 
  
   def getItemAt(index: Int): Option[Track] =
-    val isGroup = true
-    Settings.trackMode match
-      case TrackMode.`One to One`  => Some(trackBank.getItemAt(index))
-      case TrackMode.`No Groups`   => getTracks(!isGroup)(index)
-      case TrackMode.`Groups Only` => getTracks(isGroup)(index)
+    if Settings.trackMode == TrackMode.`One to One` then
+      Some(trackBank.getItemAt(index))
+    else
+      getTracks(Settings.trackMode)(index)
+  end getItemAt
 
-  def getTracks(condition: Boolean): Map[Int, Option[Track]] =
+  def getTracks(trackMode: TrackMode): Map[Int, Option[Track]] =
     var tracksMap = Map[Int, Option[Track]]()
     var idx = 0
-    for i <- 0 until trackBank.getCapacityOfBank do
+    for i <- 0 until trackBank.itemCount().get() do
       val track = trackBank.getItemAt(i)
-      if (track.isGroup.get == condition) && isActivated(i) then // track.isActivated.get then 
+      val shouldInclude = trackMode match
+        case TrackMode.`Tagged "<>" Only` => track.name.get().contains("<>")
+        case TrackMode.`Groups Only` => track.isGroup.get()
+        case TrackMode.`No Groups` => !track.isGroup.get()
+        case _ => false
+      if shouldInclude && isActivated(i) then
         tracksMap = tracksMap + (idx -> Some(track))
         idx = idx + 1
     for i <- idx until trackBank.getCapacityOfBank do
       tracksMap = tracksMap + (i -> None)
     tracksMap
-  end getTracks
+  end getTracks    
+
 
   def isActivated(trackIndex: Int): Boolean = 
     !Tracks.getBankAncestors(trackIndex).exists(t => t.exists.get() && !t.isActivated.get())
@@ -69,7 +75,7 @@ object Tracks:
     initTrackBanks
     initMasterTrack
     initCursorTrack
-    mWrapper = new TrackBankWrapper(mTrackBank)
+    mWrapper = new TrackBankWrapper(mMainTrackBank)
   end init
 
  /** Property methods */   
@@ -85,6 +91,7 @@ object Tracks:
  /** Set volume methods */ 
   def setVolume(t: Int, v: Int): Unit = 
     mWrapper.getItemAt(t).foreach(track => track.volume().set(v / 127.0))
+
   def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
 
  /** Set send methods */  
@@ -159,10 +166,7 @@ object Tracks:
       res = res :+ res.last.createParentTrack(0, 0)
     res.toSeq
 
-//  /** Track parent proxies */
-//   lazy val bankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
-
-  /** initAncestors */ 
+ /** initAncestors */ 
   private def initAncestors: Unit =
     mBankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
 

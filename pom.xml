@@ -6,7 +6,7 @@
     <artifactId>midimix</artifactId>
     <packaging>jar</packaging>
     <name>MidiMix</name>
-    <version>0.3.1</version>
+    <version>0.4.0</version>
     <repositories>
         <repository>
             <id>bitwig</id>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>20231013</version>
         </dependency>
     </dependencies>
     <profiles>
