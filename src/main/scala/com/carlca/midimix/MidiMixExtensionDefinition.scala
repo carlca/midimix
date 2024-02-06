@@ -12,7 +12,7 @@ class MidiMixExtensionDefinition extends ControllerExtensionDefinition:
   private val DRIVER_ID              = UUID.fromString("7e207ad6-30f9-4020-881e-d5f0411afa3a")
   override def getName               = "MidiMix"
   override def getAuthor             = "carlcaulkett"
-  override def getVersion            = "0.4.0"
+  override def getVersion            = "0.4.3"
   override def getId: UUID           = DRIVER_ID
   override def getHardwareVendor     = "Akai"
   override def getHardwareModel      = "MidiMix"

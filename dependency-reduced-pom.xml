@@ -4,7 +4,7 @@
   <groupId>com.carlca</groupId>
   <artifactId>midimix</artifactId>
   <name>MidiMix</name>
-  <version>0.4.0</version>
+  <version>0.4.3</version>
   <build>
     <sourceDirectory>src/main/scala</sourceDirectory>
     <testSourceDirectory>src/test/scala</testSourceDirectory>

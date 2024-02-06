@@ -63,7 +63,7 @@ object Tracks:
   def getBankAncestors: IndexedSeq[Seq[Track]] = mBankAncestors
 
  /** Consts */
-  private val MAX_TRACKS: Int       = 0x10
+  private val MAX_TRACKS: Int       = 0x1000
   private val MAX_SENDS:  Int       = 0x03
   private val MAX_SCENES: Int       = 0x10
   private val MAX_ANCESTORS: Int    = 0x10
@@ -95,20 +95,26 @@ object Tracks:
   def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
 
  /** Set send methods */  
-  def setSendA(t: Int, s: Int, v: Int): Unit = mWrapper.getItemAt(t).get.sendBank().getItemAt(s).set(v / 127.0)
-  def setSendB(t: Int, s: Int, v: Int): Unit = mWrapper.getItemAt(t).get.sendBank().getItemAt(s).set(v / 127.0)
+  def setSendA(t: Int, s: Int, v: Int): Unit = 
+    mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
+  def setSendB(t: Int, s: Int, v: Int): Unit = 
+    mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
   def setSendC(t: Int, s: Int, v: Int): Unit = 
     Settings.panSendMode match
-      case Settings.PanSendMode.`FX Send` => mWrapper.getItemAt(t).get.sendBank().getItemAt(s).set(v / 127.0)
-      case Settings.PanSendMode.`Pan`     => mWrapper.getItemAt(t).get.pan().set(v / 127.0)
-
+      case Settings.PanSendMode.`FX Send` => 
+        mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
+      case Settings.PanSendMode.`Pan`     => 
+        mWrapper.getItemAt(t).fold(())(track => track.pan().set(v / 127.0))
+  
  /** Toggle methods */   
-  def toggleMute(t: Int): Unit = mWrapper.getItemAt(t).get.mute().toggle()
-  def toggleArm(t: Int): Unit = mWrapper.getItemAt(t).get.arm().toggle()
+  def toggleMute(t: Int): Unit = 
+    mWrapper.getItemAt(t).fold(())(track => track.mute().toggle())
+  def toggleArm(t: Int): Unit = 
+    mWrapper.getItemAt(t).fold(())(track => track.arm().toggle())
   def toggleSolo(t: Int): Unit = 
     if Settings.exclusiveSolo then
-      (0 to 8).foreach(i => mWrapper.getItemAt(i).get.solo().set(false))
-    mWrapper.getItemAt(t).get.solo().toggle();
+      (0 to 8).foreach(i => mWrapper.getItemAt(i).fold(())(track => track.solo().set(false)))
+    mWrapper.getItemAt(t).fold(())(track => track.solo().toggle())
 
  /** Set bank methods */ 
   def setBankLeft(): Unit = mWrapper.scrollPageForwards()
