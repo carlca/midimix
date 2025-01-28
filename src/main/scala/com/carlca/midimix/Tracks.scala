@@ -5,8 +5,8 @@ import com.carlca.midimix.Settings
 import com.carlca.midimix.Settings.TrackMode
 import com.carlca.logger.Log
 
-class TrackBankWrapper(val trackBank: TrackBank): 
- 
+class TrackBankWrapper(val trackBank: TrackBank):
+
   def getItemAt(index: Int): Option[Track] =
     if Settings.trackMode == TrackMode.`One to One` then
       Some(trackBank.getItemAt(index))
@@ -30,10 +30,10 @@ class TrackBankWrapper(val trackBank: TrackBank):
     for i <- idx until trackBank.getCapacityOfBank do
       tracksMap = tracksMap + (i -> None)
     tracksMap
-  end getTracks    
+  end getTracks
 
 
-  def isActivated(trackIndex: Int): Boolean = 
+  def isActivated(trackIndex: Int): Boolean =
     !Tracks.getBankAncestors(trackIndex).exists(t => t.exists.get() && !t.isActivated.get())
 
   def scrollPageBackwards(): Unit = trackBank.scrollPageBackwards()
@@ -41,23 +41,23 @@ class TrackBankWrapper(val trackBank: TrackBank):
 end TrackBankWrapper
 
 object Tracks:
- 
- /** Class instances */ 
+
+ /** Class instances */
   private var mHost: ControllerHost                  = null
   private var mTransport: Transport                  = null
   private var mTrackBank: TrackBank                  = null
   private var mMainTrackBank: TrackBank              = null
-  private var mEffectTrackBank: TrackBank            = null  
+  private var mEffectTrackBank: TrackBank            = null
   private var mMasterTrack: Track                    = null
   private var mCursorTrack: CursorTrack              = null
   private var mWrapper: TrackBankWrapper             = null
   private var mBankAncestors: IndexedSeq[Seq[Track]] = null
-  
+
  /** Property methods */
   def getTransport: Transport                  = mTransport
-  def getTrackBank: TrackBank                  = mTrackBank  
+  def getTrackBank: TrackBank                  = mTrackBank
   def getMainTrackBank: TrackBank              = mMainTrackBank
-  def getEffectTrackBank: TrackBank            = mEffectTrackBank  
+  def getEffectTrackBank: TrackBank            = mEffectTrackBank
   def getMasterTrack: Track                    = mMasterTrack
   def getCursorTrack: CursorTrack              = mCursorTrack
   def getBankAncestors: IndexedSeq[Seq[Track]] = mBankAncestors
@@ -78,55 +78,55 @@ object Tracks:
     mWrapper = new TrackBankWrapper(mMainTrackBank)
   end init
 
- /** Property methods */   
-  def getIsMuted(t: Int): Boolean = 
+ /** Property methods */
+  def getIsMuted(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(true)(track => track.mute().get())
-  def getIsSolo(t: Int): Boolean = 
+  def getIsSolo(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(false)(track => track.solo().get())
-  def getIsArmed(t: Int): Boolean = 
+  def getIsArmed(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(false)(track => track.arm().get())
-  def getIsDisabled(t: Int): Boolean = 
+  def getIsDisabled(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(false)(track => track.exists().get())
 
- /** Set volume methods */ 
-  def setVolume(t: Int, v: Int): Unit = 
+ /** Set volume methods */
+  def setVolume(t: Int, v: Int): Unit =
     mWrapper.getItemAt(t).foreach(track => track.volume().set(v / 127.0))
 
   def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
 
- /** Set send methods */  
-  def setSendA(t: Int, s: Int, v: Int): Unit = 
+ /** Set send methods */
+  def setSendA(t: Int, s: Int, v: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
-  def setSendB(t: Int, s: Int, v: Int): Unit = 
+  def setSendB(t: Int, s: Int, v: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
-  def setSendC(t: Int, s: Int, v: Int): Unit = 
+  def setSendC(t: Int, s: Int, v: Int): Unit =
     Settings.panSendMode match
-      case Settings.PanSendMode.`FX Send` => 
+      case Settings.PanSendMode.`FX Send` =>
         mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
-      case Settings.PanSendMode.`Pan`     => 
+      case Settings.PanSendMode.`Pan`     =>
         mWrapper.getItemAt(t).fold(())(track => track.pan().set(v / 127.0))
-  
- /** Toggle methods */   
-  def toggleMute(t: Int): Unit = 
+
+ /** Toggle methods */
+  def toggleMute(t: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.mute().toggle())
-  def toggleArm(t: Int): Unit = 
+  def toggleArm(t: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.arm().toggle())
-  def toggleSolo(t: Int): Unit = 
+  def toggleSolo(t: Int): Unit =
     if Settings.exclusiveSolo then
       (0 to 8).foreach(i => mWrapper.getItemAt(i).fold(())(track => track.solo().set(false)))
     mWrapper.getItemAt(t).fold(())(track => track.solo().toggle())
 
- /** Set bank methods */ 
+ /** Set bank methods */
   def setBankLeft(): Unit = mWrapper.scrollPageForwards()
   def setBankRight(): Unit = mWrapper.scrollPageBackwards()
 
- /** Init methods called from MidiMixExtension.init - code must be run from init 
-  * initTransport */  
+ /** Init methods called from MidiMixExtension.init - code must be run from init
+  * initTransport */
   def initTransport: Unit = mTransport = mHost.createTransport
 
   import TrackMode.*
 
- /** initTrackBanks */ 
+ /** initTrackBanks */
   private def initTrackBanks: Unit =
     mTrackBank = mHost.createTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
     mMainTrackBank = mHost.createMainTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
@@ -144,7 +144,7 @@ object Tracks:
     mMasterTrack.name.markInterested
   end initMasterTrack
 
- /** initInterest */   
+ /** initInterest */
   private def initInterest(bank: TrackBank): Unit =
     bank.itemCount.markInterested
     bank.channelCount.markInterested
@@ -165,23 +165,23 @@ object Tracks:
       parent.name.markInterested
   end initInterest
 
- /** ancestors */ 
+ /** ancestors */
   def ancestors(track: Track): Seq[Track] =
     var res = List(track)
     for i <- 0 until MAX_ANCESTORS do
       res = res :+ res.last.createParentTrack(0, 0)
     res.toSeq
 
- /** initAncestors */ 
+ /** initAncestors */
   private def initAncestors: Unit =
     mBankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
 
- /** initAncestorInterest */ 
+ /** initAncestorInterest */
   private def initAncestorInterest: Unit =
     for ba <- mBankAncestors; t <- ba do
       t.exists.markInterested()
       t.isActivated.markInterested()
 
- /** initCursorTrack */ 
+ /** initCursorTrack */
   private def initCursorTrack: Unit =
     mCursorTrack = mHost.createCursorTrack(1, 0)
