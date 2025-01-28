@@ -80,7 +80,7 @@ object Tracks:
 
  /** Property methods */   
   def getIsMuted(t: Int): Boolean = 
-    mWrapper.getItemAt(t).fold(false)(track => track.mute().get())
+    mWrapper.getItemAt(t).fold(true)(track => track.mute().get())
   def getIsSolo(t: Int): Boolean = 
     mWrapper.getItemAt(t).fold(false)(track => track.solo().get())
   def getIsArmed(t: Int): Boolean = 

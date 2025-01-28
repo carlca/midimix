@@ -6,6 +6,14 @@
       "name": "Debug",
       "hostName": "localhost",
       "port": 5005
-    }
+    },
+    {
+      "type": "scala",
+      "name": "Bitwig Debug (Attach)",
+      "buildTarget": "midimix",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005
+  }
   ]
 }
