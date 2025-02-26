@@ -1,6 +1,7 @@
 package com.carlca.midimix
 
-import com.bitwig.extension.api.util.midi.ShortMidiMessage;
+import com.bitwig.extension.api.util.midi.ShortMidiMessage
+
 import scala.collection.SortedMap
 
 enum ButtonType derives CanEqual:

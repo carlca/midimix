@@ -1,13 +1,13 @@
 package com.carlca
 package config
 
+import org.json.*
+import org.json.JSONObject
+
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-
-import org.json.*
-import org.json.JSONObject
 
 enum OS:
   case WINDOWS, MACOS, LINUX

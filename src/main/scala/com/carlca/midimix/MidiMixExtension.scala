@@ -5,8 +5,6 @@ import com.bitwig.extension.api.util.midi.ShortMidiMessage
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.config.Config
-import com.carlca.logger.Log
-import com.carlca.midimix.Settings
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
@@ -16,18 +14,18 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     val host = getHost
     MidiMixLights.init(host)
     Config.init(APP_NAME)
-    Settings.init(host)
+    MidiMixSettings.init(host)
     Tracks.init(host)
     initEvents(host)
   override def exit: Unit = None
 
-  override def flush: Unit = 
+  override def flush: Unit =
     MidiMixLights.flushLights
 
   private def initEvents(host: ControllerHost): Unit =
     initOnMidiCallback(host)
     initOnSysexCallback(host)
-  end initEvents  
+  end initEvents
 
   private def initOnMidiCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))

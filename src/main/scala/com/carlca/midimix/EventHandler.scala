@@ -1,6 +1,7 @@
 package com.carlca.midimix
 
 import com.carlca.logger.Log
+
 import Tracks.*
 
 enum ButtonMode derives CanEqual:

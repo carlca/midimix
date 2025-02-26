@@ -1,13 +1,13 @@
 package com.carlca
 package logger
 
-import java.io.*
-import java.net.ServerSocket
-
-import scala.util.{Using, Try}
-
 import com.carlca.config.Config
 import com.carlca.utils.ConsoleUtils
+
+import java.io.*
+import java.net.ServerSocket
+import scala.util.Try
+import scala.util.Using
 
 object Receiver:
 

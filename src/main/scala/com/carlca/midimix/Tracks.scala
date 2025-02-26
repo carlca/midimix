@@ -1,37 +1,31 @@
 package com.carlca.midimix
 
 import com.bitwig.extension.controller.api.*
-import com.carlca.midimix.Settings
-import com.carlca.midimix.Settings.TrackMode
-import com.carlca.logger.Log
+import com.carlca.midimix.MidiMixSettings.TrackMode
 
 class TrackBankWrapper(val trackBank: TrackBank):
 
   def getItemAt(index: Int): Option[Track] =
-    if Settings.trackMode == TrackMode.`One to One` then
-      Some(trackBank.getItemAt(index))
-    else
-      getTracks(Settings.trackMode)(index)
+    if MidiMixSettings.trackMode == TrackMode.`One to One` then Some(trackBank.getItemAt(index))
+    else getTracks(MidiMixSettings.trackMode)(index)
   end getItemAt
 
   def getTracks(trackMode: TrackMode): Map[Int, Option[Track]] =
     var tracksMap = Map[Int, Option[Track]]()
-    var idx = 0
+    var idx       = 0
     for i <- 0 until trackBank.itemCount().get() do
       val track = trackBank.getItemAt(i)
       val shouldInclude = trackMode match
         case TrackMode.`Tagged "<>" Only` => track.name.get().contains("<>")
-        case TrackMode.`Groups Only` => track.isGroup.get()
-        case TrackMode.`No Groups` => !track.isGroup.get()
-        case _ => false
+        case TrackMode.`Groups Only`      => track.isGroup.get()
+        case TrackMode.`No Groups`        => !track.isGroup.get()
+        case _                            => false
       if shouldInclude && isActivated(i) then
         tracksMap = tracksMap + (idx -> Some(track))
         idx = idx + 1
-    for i <- idx until trackBank.getCapacityOfBank do
-      tracksMap = tracksMap + (i -> None)
+    for i <- idx until trackBank.getCapacityOfBank do tracksMap = tracksMap + (i -> None)
     tracksMap
   end getTracks
-
 
   def isActivated(trackIndex: Int): Boolean =
     !Tracks.getBankAncestors(trackIndex).exists(t => t.exists.get() && !t.isActivated.get())
@@ -42,7 +36,7 @@ end TrackBankWrapper
 
 object Tracks:
 
- /** Class instances */
+  /** Class instances */
   private var mHost: ControllerHost                  = null
   private var mTransport: Transport                  = null
   private var mTrackBank: TrackBank                  = null
@@ -53,7 +47,7 @@ object Tracks:
   private var mWrapper: TrackBankWrapper             = null
   private var mBankAncestors: IndexedSeq[Seq[Track]] = null
 
- /** Property methods */
+  /** Property methods */
   def getTransport: Transport                  = mTransport
   def getTrackBank: TrackBank                  = mTrackBank
   def getMainTrackBank: TrackBank              = mMainTrackBank
@@ -62,13 +56,13 @@ object Tracks:
   def getCursorTrack: CursorTrack              = mCursorTrack
   def getBankAncestors: IndexedSeq[Seq[Track]] = mBankAncestors
 
- /** Consts */
-  private val MAX_TRACKS: Int       = 0x1000
-  private val MAX_SENDS:  Int       = 0x03
-  private val MAX_SCENES: Int       = 0x10
-  private val MAX_ANCESTORS: Int    = 0x10
+  /** Consts */
+  private val MAX_TRACKS: Int    = 0x1000
+  private val MAX_SENDS: Int     = 0x03
+  private val MAX_SCENES: Int    = 0x10
+  private val MAX_ANCESTORS: Int = 0x10
 
- /** init method */
+  /** init method */
   def init(host: ControllerHost): Unit =
     mHost = host
     initTransport
@@ -78,7 +72,7 @@ object Tracks:
     mWrapper = new TrackBankWrapper(mMainTrackBank)
   end init
 
- /** Property methods */
+  /** Property methods */
   def getIsMuted(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(true)(track => track.mute().get())
   def getIsSolo(t: Int): Boolean =
@@ -88,45 +82,44 @@ object Tracks:
   def getIsDisabled(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(false)(track => track.exists().get())
 
- /** Set volume methods */
+  /** Set volume methods */
   def setVolume(t: Int, v: Int): Unit =
     mWrapper.getItemAt(t).foreach(track => track.volume().set(v / 127.0))
 
   def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
 
- /** Set send methods */
+  /** Set send methods */
   def setSendA(t: Int, s: Int, v: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
   def setSendB(t: Int, s: Int, v: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
   def setSendC(t: Int, s: Int, v: Int): Unit =
-    Settings.panSendMode match
-      case Settings.PanSendMode.`FX Send` =>
+    MidiMixSettings.panSendMode match
+      case MidiMixSettings.PanSendMode.`FX Send` =>
         mWrapper.getItemAt(t).fold(())(track => track.sendBank().getItemAt(s).set(v / 127.0))
-      case Settings.PanSendMode.`Pan`     =>
+      case MidiMixSettings.PanSendMode.`Pan` =>
         mWrapper.getItemAt(t).fold(())(track => track.pan().set(v / 127.0))
 
- /** Toggle methods */
+  /** Toggle methods */
   def toggleMute(t: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.mute().toggle())
   def toggleArm(t: Int): Unit =
     mWrapper.getItemAt(t).fold(())(track => track.arm().toggle())
   def toggleSolo(t: Int): Unit =
-    if Settings.exclusiveSolo then
+    if MidiMixSettings.exclusiveSolo then
       (0 to 8).foreach(i => mWrapper.getItemAt(i).fold(())(track => track.solo().set(false)))
     mWrapper.getItemAt(t).fold(())(track => track.solo().toggle())
 
- /** Set bank methods */
-  def setBankLeft(): Unit = mWrapper.scrollPageForwards()
+  /** Set bank methods */
+  def setBankLeft(): Unit  = mWrapper.scrollPageForwards()
   def setBankRight(): Unit = mWrapper.scrollPageBackwards()
 
- /** Init methods called from MidiMixExtension.init - code must be run from init
+  /** Init methods called from MidiMixExtension.init - code must be run from init
   * initTransport */
   def initTransport: Unit = mTransport = mHost.createTransport
 
-  import TrackMode.*
 
- /** initTrackBanks */
+  /** initTrackBanks */
   private def initTrackBanks: Unit =
     mTrackBank = mHost.createTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
     mMainTrackBank = mHost.createMainTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
@@ -138,13 +131,13 @@ object Tracks:
     initAncestorInterest
   end initTrackBanks
 
- /** initMasterTrack */
+  /** initMasterTrack */
   private def initMasterTrack: Unit =
     mMasterTrack = mHost.createMasterTrack(0)
     mMasterTrack.name.markInterested
   end initMasterTrack
 
- /** initInterest */
+  /** initInterest */
   private def initInterest(bank: TrackBank): Unit =
     bank.itemCount.markInterested
     bank.channelCount.markInterested
@@ -165,23 +158,22 @@ object Tracks:
       parent.name.markInterested
   end initInterest
 
- /** ancestors */
+  /** ancestors */
   def ancestors(track: Track): Seq[Track] =
     var res = List(track)
-    for i <- 0 until MAX_ANCESTORS do
-      res = res :+ res.last.createParentTrack(0, 0)
+    for i <- 0 until MAX_ANCESTORS do res = res :+ res.last.createParentTrack(0, 0)
     res.toSeq
 
- /** initAncestors */
+  /** initAncestors */
   private def initAncestors: Unit =
     mBankAncestors = (0 until MAX_TRACKS).map(mTrackBank.getItemAt).map(ancestors)
 
- /** initAncestorInterest */
+  /** initAncestorInterest */
   private def initAncestorInterest: Unit =
     for ba <- mBankAncestors; t <- ba do
       t.exists.markInterested()
       t.isActivated.markInterested()
 
- /** initCursorTrack */
+  /** initCursorTrack */
   private def initCursorTrack: Unit =
     mCursorTrack = mHost.createCursorTrack(1, 0)
