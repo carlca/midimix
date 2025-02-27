@@ -13,7 +13,6 @@ object MidiMixLights:
   def init(host: ControllerHost): Unit =
     mHost = host
 
-
   /** Flushes all button lights, checking for state changes */
   def flushLights: Unit =
     flushArmLights
