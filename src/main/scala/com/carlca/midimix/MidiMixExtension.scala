@@ -45,7 +45,8 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     (status, channel, cc, data2)
 
   private def onMidi0(msg: ShortMidiMessage): Unit =
-    val (status, channel, cc, data2) = unpackMsg(msg, true)
+    val (status, channel, cc, data2) = unpackMsg(msg, false)
+    // Check status in range 176 to 191 (0xB0 to 0xBF) and CC in range 16 to 255
     if (STATUS_RANGE contains status) && (CC_RANGE contains cc) then
       MidiProcessor.process(msg)
 
