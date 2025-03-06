@@ -81,7 +81,7 @@
             </goals>
             <configuration>
               <sourceFile>${project.build.directory}/${project.build.finalName}.jar</sourceFile>
-              <destinationFile>/users/carlcaulkett/Documents/Bitwig Studio/Extensions/MidiMix.bwextension</destinationFile>
+              <destinationFile>${bitwig.extension.directory}/MidiMix.bwextension</destinationFile>
             </configuration>
           </execution>
         </executions>
