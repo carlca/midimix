@@ -55,6 +55,7 @@ object Config:
       case OS.LINUX   => getPath("APPDATA", "config")
       case OS.MACOS   => getPath("user.home", "Library/Application Support")
       case OS.WINDOWS => getPath("user.home", ".config")
+    println(s"Config folder: $folder")
     folder.resolve(appName.get).toString
   end getConfigFolder
 
