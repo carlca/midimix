@@ -49,14 +49,14 @@ object Config:
 
   private def getConfigFolder: String =
     def getPath(prop: String, pathName: String): Path =
-      Paths.get(System.getProperties.get(prop).asInstanceOf[String]).resolve(pathName)
+      Paths.get(System.getProperty(prop)).resolve(pathName)
     val os = getOs
     val folder = os match
-      case OS.LINUX   => getPath("APPDATA", "config")
+      case OS.LINUX   => getPath("user.home", ".config") // Use user.home on Linux
       case OS.MACOS   => getPath("user.home", "Library/Application Support")
       case OS.WINDOWS => getPath("user.home", ".config")
-    println(s"Config folder: $folder")
-    folder.resolve(appName.get).toString
+    val name = appName.getOrElse("default_app") // Handle the uninitialized case
+    folder.resolve(name).toString
   end getConfigFolder
 
   private def getConfigPath =
