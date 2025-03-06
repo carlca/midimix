@@ -17,7 +17,7 @@ object Config:
 
   def init(appName: String): Unit =
     Config.appName = Some(appName)
-    initFolder
+    // initFolder
 
   def getLogPort: Integer =
     getJsonObject.getInt("logPort")
@@ -65,7 +65,9 @@ object Config:
   end getConfigPath
 
   private def initFolder: Unit =
+    host.println("Config.initFolder started.")
     val path = Paths.get(this.getConfigFolder)
+    host.println("Config.initFolder started.")
     if !Files.exists(path) then Files.createDirectories(path)
   end initFolder
 

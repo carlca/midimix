@@ -15,17 +15,11 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   override def init: Unit =
     val host = getHost
-    host.println("Init started.")
     MidiMixLights.init(host)
-    host.println("MidiMixLights.init(host) completed.")
     Config.init(APP_NAME)
-    host.println("Config.init(APP_NAME) completed.")
     MidiMixSettings.init(host)
-    host.println("MidiMixSettings.init(host) completed.")
     Tracks.init(host)
-    host.println("Tracks.init(host) completed.")
     initEvents(host)
-    host.println("initEvents(host) completed.")
   override def exit: Unit = None
 
   override def flush: Unit =
