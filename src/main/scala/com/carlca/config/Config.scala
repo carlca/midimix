@@ -67,6 +67,16 @@ object Config:
   private def initFolder: Unit =
     val path = Paths.get(this.getConfigFolder)
     if !Files.exists(path) then Files.createDirectories(path)
+
+    val configFile = Paths.get(this.getConfigPath.toString)
+    if !Files.exists(configFile) then
+      createDefaultConfig(configFile)
   end initFolder
+
+  private def createDefaultConfig(configFile: Path): Unit =
+    val defaultConfig = new JSONObject()
+    defaultConfig.put("logPort", 0)
+    Files.write(configFile, defaultConfig.toString(4).getBytes(StandardCharsets.UTF_8))
+  end createDefaultConfig
 
 end Config
