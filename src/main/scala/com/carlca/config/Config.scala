@@ -17,7 +17,7 @@ object Config:
 
   def init(appName: String): Unit =
     Config.appName = Some(appName)
-    // initFolder
+    initFolder
 
   def getLogPort: Integer =
     getJsonObject.getInt("logPort")
