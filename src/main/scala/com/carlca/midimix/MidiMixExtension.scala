@@ -10,8 +10,8 @@ import com.carlca.logger.Log
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
   private val APP_NAME = "com.carlca.MidiMix"
-  private val STATUS_RANGE = ShortMidiMessage.CONTROL_CHANGE to (ShortMidiMessage.CONTROL_CHANGE + 15)
-  private val CC_RANGE = 16 to 255
+  // private val STATUS_RANGE = ShortMidiMessage.CONTROL_CHANGE to (ShortMidiMessage.CONTROL_CHANGE + 15)
+  // private val CC_RANGE = 16 to 255
 
   override def init: Unit =
     val host = getHost
@@ -45,10 +45,10 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     (status, channel, cc, data2)
 
   private def onMidi0(msg: ShortMidiMessage): Unit =
-    val (status, channel, cc, data2) = unpackMsg(msg, false)
+    val (status, channel, cc, data2) = unpackMsg(msg, true)
     // Check status in range 176 to 191 (0xB0 to 0xBF) and CC in range 16 to 255
-    if (STATUS_RANGE contains status) && (CC_RANGE contains cc) then
-      MidiProcessor.process(msg)
+    // if (STATUS_RANGE contains status) && (CC_RANGE contains cc) then
+    MidiProcessor.process(msg)
 
   @FunctionalInterface
   private def onSysex0(data: String): Unit = ()
