@@ -44,10 +44,19 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
     if doLog then Log.send(s"unpackMsg: status=$status, channel=$channel, cc=$cc, data2=$data2")
     (status, channel, cc, data2)
 
+  private def volumeToDecibels(volume: Int): Double =
+      volume match
+        case 0 => Double.NegativeInfinity // -∞ dB for volume = 0
+        case v => -60.0 + (v - 1) * 0.5238 // Linear dB mapping for 1 to 127
+
   private def onMidi0(msg: ShortMidiMessage): Unit =
-    val (status, channel, cc, data2) = unpackMsg(msg, true)
+    val (status, channel, cc, data2) = unpackMsg(msg, false)
+    val v = data2.toString
+    val db = volumeToDecibels(data2).toString
+    Log.send(s"onMidi0: v=$v, db=$db")
     // Check status in range 176 to 191 (0xB0 to 0xBF) and CC in range 16 to 255
     // if (STATUS_RANGE contains status) && (CC_RANGE contains cc) then
+    // msg,data2 = 104
     MidiProcessor.process(msg)
 
   @FunctionalInterface
