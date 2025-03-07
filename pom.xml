@@ -6,7 +6,7 @@
     <artifactId>midimix</artifactId>
     <packaging>jar</packaging>
     <name>MidiMix</name>
-    <version>0.4.4</version>
+    <version>0.4.5</version>
     <repositories>
         <repository>
             <id>bitwig</id>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala3-library_3</artifactId>
-            <version>3.3.1</version>
+            <version>3.6.3</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
