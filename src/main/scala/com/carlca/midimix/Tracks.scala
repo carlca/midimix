@@ -83,10 +83,10 @@ object Tracks:
     mWrapper.getItemAt(t).fold(false)(track => track.exists().get())
 
   /** Set volume methods */
-  def setVolume(t: Int, v: Int): Unit =
+  def setVolume(t: Int, v: Double): Unit =
     mWrapper.getItemAt(t).foreach(track => track.volume().set(v / 127.0))
 
-  def setMasterVolume(v: Int): Unit = mMasterTrack.volume().set(v / 127.0)
+  def setMasterVolume(v: Double): Unit = mMasterTrack.volume().set(v / 127.0)
 
   /** Set send methods */
   def setSendA(t: Int, s: Int, v: Int): Unit =
