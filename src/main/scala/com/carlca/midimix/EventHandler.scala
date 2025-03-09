@@ -9,18 +9,25 @@ enum ButtonMode derives CanEqual:
 
 object EventHandler:
 
-  private val LOG_MIDI_EVENTS = false
+  private val LOG_MIDI_EVENTS = true
 
   private var mMode = ButtonMode.Mute
 
-  private def scaleVolume(v: Int, maxVol: Double): Double =
-    maxVol * (v / 127.0)
+  private def scaleVolume(v: Int, minVol: Double, maxVol: Double): Double =
+    minVol + (maxVol - minVol) * (v / 127.0)
 
   def getButtonMode: ButtonMode = mMode
 
   def volumeChanged(e: MidiEvent): Unit =
     if LOG_MIDI_EVENTS then Log.send(e.toString)
-    Tracks.setVolume(e.track, scaleVolume(e.volume, MidiMixSettings.getMaxVolume(e.track)))
+
+    // val v = e.volume
+    // val (minVol, maxVol) = MidiMixSettings.getVolumeRange(e.track)
+    // val vv = scaleVolume(v, minVol, maxVol)
+    // if LOG_MIDI_EVENTS then Log.send(s"v: $v, minVol: $minVol, maxVol: $maxVol, vv: $vv")
+    // val vv = scaleVolume(e.volume, volRange._1, volRange._2)
+    val volRange = MidiMixSettings.getVolumeRange(e.track)
+    Tracks.setVolume(e.track, scaleVolume(e.volume, volRange._1, volRange._2))
 
   def sendAChanged(e: MidiEvent): Unit =
     if LOG_MIDI_EVENTS then Log.send(e.toString)

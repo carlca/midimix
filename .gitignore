@@ -1,4 +1,5 @@
 # Scala specific
+bitwig_api_docs/
 target/
 lib_managed/
 .project
