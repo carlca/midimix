@@ -118,7 +118,6 @@ object Tracks:
   * initTransport */
   def initTransport: Unit = mTransport = mHost.createTransport
 
-
   /** initTrackBanks */
   private def initTrackBanks: Unit =
     mTrackBank = mHost.createTrackBank(MAX_TRACKS, MAX_SENDS, MAX_SCENES)
