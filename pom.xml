@@ -6,7 +6,7 @@
     <artifactId>midimix</artifactId>
     <packaging>jar</packaging>
     <name>MidiMix</name>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <repositories>
         <repository>
             <id>bitwig</id>
