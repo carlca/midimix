@@ -15,34 +15,6 @@ object MidiMixSettings:
   var panSendMode: PanSendMode = PanSendMode.`FX Send`
   var trackMode:  TrackMode = TrackMode.`One to One`
 
-  // // Track 1
-  // var track1MinDb: Double = Double.NegativeInfinity
-  // var track1MaxDb: Double = 6.0
-  // // Track 2
-  // var track2MinDb: Double = Double.NegativeInfinity
-  // var track2MaxDb: Double = 6.0
-  // // Track 3
-  // var track3MinDb: Double = Double.NegativeInfinity
-  // var track3MaxDb: Double = 6.0
-  // // Track 1
-  // var track4MinDb: Double = Double.NegativeInfinity
-  // var track4MaxDb: Double = 6.0
-  // // Track 5
-  // var track5MinDb: Double = Double.NegativeInfinity
-  // var track5MaxDb: Double = 6.0
-  // // Track 6
-  // var track6MinDb: Double = Double.NegativeInfinity
-  // var track6MaxDb: Double = 6.0
-  // // Track 7
-  // var track7MinDb: Double = Double.NegativeInfinity
-  // var track7MaxDb: Double = 6.0
-  // // Track 8
-  // var track8MinDb: Double = Double.NegativeInfinity
-  // var track8MaxDb: Double = 6.0
-  // // Master
-  // var masterMinDb: Double = Double.NegativeInfinity
-  // var masterMaxDb: Double = 6.0
-
   val MIN = "min"
   val MAX = "max"
   val MASTER = 0
