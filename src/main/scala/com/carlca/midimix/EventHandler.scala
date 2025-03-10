@@ -20,14 +20,7 @@ object EventHandler:
 
   def volumeChanged(e: MidiEvent): Unit =
     if LOG_MIDI_EVENTS then Log.send(e.toString)
-
-    // val v = e.volume
-    // val (minVol, maxVol) = MidiMixSettings.getVolumeRange(e.track)
-    // val vv = scaleVolume(v, minVol, maxVol)
-    // if LOG_MIDI_EVENTS then Log.send(s"v: $v, minVol: $minVol, maxVol: $maxVol, vv: $vv")
-    // val vv = scaleVolume(e.volume, volRange._1, volRange._2)
-    val volRange = MidiMixSettings.getVolumeRange(e.track)
-    Tracks.setVolume(e.track, scaleVolume(e.volume, volRange._1, volRange._2))
+    Tracks.setVolume(e.track, e.volume)
 
   def sendAChanged(e: MidiEvent): Unit =
     if LOG_MIDI_EVENTS then Log.send(e.toString)

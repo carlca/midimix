@@ -82,9 +82,15 @@ object Tracks:
   def getIsDisabled(t: Int): Boolean =
     mWrapper.getItemAt(t).fold(false)(track => track.exists().get())
 
+  /** Scale volume to a range */
+  private def scaleVolume(v: Double, minVol: Double, maxVol: Double): Double =
+    minVol + (maxVol - minVol) * (v / 127.0)
+
   /** Set volume methods */
   def setVolume(t: Int, v: Double): Unit =
-    mWrapper.getItemAt(t).foreach(track => track.volume().set(v / 127.0))
+    val volRange = MidiMixSettings.getVolumeRange(t)
+    val scaledVol = scaleVolume(v, volRange._1, volRange._2)
+    mWrapper.getItemAt(t).foreach(track => track.volume().set(scaledVol / 127.0))
 
   def setMasterVolume(v: Double): Unit = mMasterTrack.volume().set(v / 127.0)
 
@@ -114,8 +120,7 @@ object Tracks:
   def setBankLeft(): Unit  = mWrapper.scrollPageForwards()
   def setBankRight(): Unit = mWrapper.scrollPageBackwards()
 
-  /** Init methods called from MidiMixExtension.init - code must be run from init
-  * initTransport */
+  /** initTransport */
   def initTransport: Unit = mTransport = mHost.createTransport
 
   /** initTrackBanks */
