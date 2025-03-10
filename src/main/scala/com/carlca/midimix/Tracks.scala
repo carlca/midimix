@@ -92,7 +92,10 @@ object Tracks:
     val scaledVol = scaleVolume(v, volRange._1, volRange._2)
     mWrapper.getItemAt(t).foreach(track => track.volume().set(scaledVol / 127.0))
 
-  def setMasterVolume(v: Double): Unit = mMasterTrack.volume().set(v / 127.0)
+  def setMasterVolume(v: Double): Unit =
+    val volRange = MidiMixSettings.getMasterVolumeRange
+    val scaledVol = scaleVolume(v, volRange._1, volRange._2)
+    mMasterTrack.volume().set(scaledVol / 127.0)
 
   /** Set send methods */
   def setSendA(t: Int, s: Int, v: Int): Unit =

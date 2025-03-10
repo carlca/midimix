@@ -91,6 +91,9 @@ object MidiMixSettings:
   def getVolumeRange(track: Int): (Double, Double) =
     (dbToVolume(trackMinDb(track + 1)), dbToVolume(trackMaxDb(track + 1)))
 
+  def getMasterVolumeRange: (Double, Double) =
+    (dbToVolume(trackMinDb(MASTER)), dbToVolume(trackMaxDb(MASTER)))
+
   private val dbToVolumeLookupTable: Array[Double] =
     val steps = ((MAX_DB - MIN_DB) * 10).toInt
     val table = new Array[Double](steps + 1)
