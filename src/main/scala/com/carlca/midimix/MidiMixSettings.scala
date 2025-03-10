@@ -15,10 +15,13 @@ object MidiMixSettings:
   var panSendMode: PanSendMode = PanSendMode.`FX Send`
   var trackMode:  TrackMode = TrackMode.`One to One`
 
-  val MIN = "min"
-  val MAX = "max"
-  val MASTER = 0
-  val NUM_TRACKS = 8  // Number of tracks
+  private val MIN = "min"
+  private val MAX = "max"
+  private val MASTER = 0
+  private val NUM_TRACKS = 8  // Number of tracks
+  private val MIN_DB = -160.0
+  private val MAX_DB = 6.0
+  private val DB_INCREMENT = 0.1
 
   // min/max dB values for each track
   private val trackMinDb = Array.fill[Double](NUM_TRACKS + 1)(Double.NegativeInfinity)  // +1 for Master
@@ -43,8 +46,8 @@ object MidiMixSettings:
 
     def createTrackDbSetting(minMax: String, trackNumber: Int): SettableRangedValue =
       val settingName = if trackNumber == 0 then "Master dB" else s"Fader $trackNumber dB"
-      prefs.getNumberSetting(minMax, settingName, Double.NegativeInfinity, 6.0, 0.1, null,
-        if minMax == MIN then Double.NegativeInfinity else 6.0
+      prefs.getNumberSetting(minMax, settingName, MIN_DB, MAX_DB, 0.1, null,
+        if minMax == MIN then MIN_DB else MAX_DB
       )
 
     def addTrackDbObserver(setting: SettableRangedValue, minMax: String, trackNumber: Int): Unit =
@@ -87,10 +90,6 @@ object MidiMixSettings:
 
   def getVolumeRange(track: Int): (Double, Double) =
     (dbToVolume(trackMinDb(track + 1)), dbToVolume(trackMaxDb(track + 1)))
-
-  private val MIN_DB = -160.0
-  private val MAX_DB = 6.0
-  private val DB_INCREMENT = 0.1
 
   private val dbToVolumeLookupTable: Array[Double] =
     val steps = ((MAX_DB - MIN_DB) * 10).toInt
