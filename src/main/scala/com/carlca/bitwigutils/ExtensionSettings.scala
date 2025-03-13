@@ -1,12 +1,11 @@
-package com.carlca.midimix
+package com.carlca.bitwigutils
 
 import scala.math._
 import com.bitwig.extension.controller.api.*
 import com.bitwig.extension.callback.DoubleValueChangedCallback
-import com.bitwig.extension.controller.api.SettableRangedValue
 // import com.carlca.logger.Log
 
-object MidiMixSettings:
+object ExtensionSettings:
   enum PanSendMode derives CanEqual:
     case `FX Send`, `Pan`
   enum TrackMode derives CanEqual:
@@ -18,7 +17,7 @@ object MidiMixSettings:
   private val MIN = "min"
   private val MAX = "max"
   private val MASTER = 0
-  private val NUM_TRACKS = 8  // Number of tracks
+  private val NUM_TRACKS = 8
   private val MIN_DB = -160.0
   private val MAX_DB = 6.0
   private val DB_INCREMENT = 0.1
@@ -34,15 +33,15 @@ object MidiMixSettings:
     val prefs = host.getPreferences
 
     val soloSetting = prefs.getBooleanSetting("Exclusive Solo", "Solo Behaviour", false)
-    soloSetting.addValueObserver((value) => MidiMixSettings.exclusiveSolo = value)
+    soloSetting.addValueObserver((value) => ExtensionSettings.exclusiveSolo = value)
 
     val values = PanSendMode.values.map(_.toString).toArray
     val panSetting = prefs.getEnumSetting("Send/Pan Mode", "Third Row Behaviour", values, PanSendMode.`FX Send`.toString())
-    panSetting.addValueObserver((value) => MidiMixSettings.panSendMode = PanSendMode.valueOf(value))
+    panSetting.addValueObserver((value) => ExtensionSettings.panSendMode = PanSendMode.valueOf(value))
 
     val trackModes = TrackMode.values.map(_.toString).toArray
     val trackSetting = prefs.getEnumSetting("Track Mode", "Track Mapping Behaviour", trackModes, TrackMode.`One to One`.toString())
-    trackSetting.addValueObserver((value) => MidiMixSettings.trackMode = TrackMode.valueOf(value))
+    trackSetting.addValueObserver((value) => ExtensionSettings.trackMode = TrackMode.valueOf(value))
 
     def createTrackDbSetting(minMax: String, trackNumber: Int): SettableRangedValue =
       val settingName = if trackNumber == 0 then "Master dB" else s"Fader $trackNumber dB"
@@ -110,5 +109,3 @@ object MidiMixSettings:
     else
       val index = math.round(((db - MIN_DB) / DB_INCREMENT)).toInt
       dbToVolumeLookupTable(index)
-
-end MidiMixSettings

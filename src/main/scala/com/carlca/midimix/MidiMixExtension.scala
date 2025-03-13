@@ -4,22 +4,20 @@ package midimix
 import com.bitwig.extension.api.util.midi.ShortMidiMessage
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
-import com.carlca.config.Config
 import com.carlca.logger.Log
+import com.carlca.bitwigutils.Tracks
+import com.carlca.bitwigutils.ExtensionSettings
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
-  private val APP_NAME = "com.carlca.MidiMix"
-  // private val STATUS_RANGE = ShortMidiMessage.CONTROL_CHANGE to (ShortMidiMessage.CONTROL_CHANGE + 15)
-  // private val CC_RANGE = 16 to 255
 
   override def init: Unit =
     val host = getHost
     MidiMixLights.init(host)
-    Config.init(APP_NAME)
-    MidiMixSettings.init(host)
+    ExtensionSettings.init(host)
     Tracks.init(host)
     initEvents(host)
+
   override def exit: Unit = None
 
   override def flush: Unit =
@@ -28,7 +26,6 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   private def initEvents(host: ControllerHost): Unit =
     initOnMidiCallback(host)
     initOnSysexCallback(host)
-  end initEvents
 
   private def initOnMidiCallback(host: ControllerHost): Unit =
     host.getMidiInPort(0).setMidiCallback((a, b, c) => onMidi0(ShortMidiMessage(a, b, c)))
@@ -50,5 +47,3 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
 
   @FunctionalInterface
   private def onSysex0(data: String): Unit = ()
-
-end MidiMixExtension

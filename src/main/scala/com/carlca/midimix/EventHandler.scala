@@ -2,7 +2,7 @@ package com.carlca.midimix
 
 import com.carlca.logger.Log
 
-import Tracks.*
+import com.carlca.bitwigutils.Tracks
 
 enum ButtonMode derives CanEqual:
   case Mute, Solo
@@ -12,9 +12,6 @@ object EventHandler:
   private val LOG_MIDI_EVENTS = true
 
   private var mMode = ButtonMode.Mute
-
-  private def scaleVolume(v: Int, minVol: Double, maxVol: Double): Double =
-    minVol + (maxVol - minVol) * (v / 127.0)
 
   def getButtonMode: ButtonMode = mMode
 

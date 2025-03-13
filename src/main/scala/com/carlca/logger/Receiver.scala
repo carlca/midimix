@@ -1,5 +1,4 @@
-package com.carlca
-package logger
+package com.carlca.logger
 
 import com.carlca.config.Config
 import com.carlca.utils.ConsoleUtils
@@ -16,7 +15,6 @@ object Receiver:
     val serverSocket = new ServerSocket(port)
     outputMessage("Receiver listening on port " + port)
     outputMessage("")
-    Config.init("com.carlca.MidiMix")
     Config.setLogPort(port)
     // handle ctrl/c
     Runtime.getRuntime.addShutdownHook(

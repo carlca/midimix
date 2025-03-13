@@ -1,5 +1,4 @@
-package com.carlca
-package utils
+package com.carlca.utils
 
 import java.util.regex.Pattern
 
