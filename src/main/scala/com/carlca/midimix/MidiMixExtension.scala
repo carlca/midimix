@@ -5,6 +5,8 @@ import com.bitwig.extension.api.util.midi.ShortMidiMessage
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.logger.Log
+import com.carlca.bitwiglibrary.ExtensionSettings
+import com.carlca.bitwiglibrary.ExtensionSettings.SettingsCapability
 import com.carlca.bitwiglibrary.Tracks
 import com.carlca.bitwiglibrary.ExtensionSettings
 
@@ -14,6 +16,11 @@ class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerH
   override def init: Unit =
     val host = getHost
     MidiMixLights.init(host)
+    ExtensionSettings.settingsCapabilities += SettingsCapability.`Solo Behaviour`
+    ExtensionSettings.settingsCapabilities += SettingsCapability.`Third Row Behaviour`
+    ExtensionSettings.settingsCapabilities += SettingsCapability.`Track Mapping Behaviour`
+    ExtensionSettings.settingsCapabilities += SettingsCapability.`Fader dB Range`
+    ExtensionSettings.settingsCapabilities += SettingsCapability.`Master dB Range`
     ExtensionSettings.init(host)
     Tracks.init(host)
     initEvents(host)
