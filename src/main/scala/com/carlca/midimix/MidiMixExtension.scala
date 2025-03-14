@@ -8,7 +8,6 @@ import com.carlca.logger.Log
 import com.carlca.bitwiglibrary.ExtensionSettings
 import com.carlca.bitwiglibrary.ExtensionSettings.SettingsCapability
 import com.carlca.bitwiglibrary.Tracks
-import com.carlca.bitwiglibrary.ExtensionSettings
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):
