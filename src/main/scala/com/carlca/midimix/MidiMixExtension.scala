@@ -5,8 +5,8 @@ import com.bitwig.extension.api.util.midi.ShortMidiMessage
 import com.bitwig.extension.controller.ControllerExtension
 import com.bitwig.extension.controller.api.*
 import com.carlca.logger.Log
-import com.carlca.bitwigutils.Tracks
-import com.carlca.bitwigutils.ExtensionSettings
+import com.carlca.bitwiglibrary.Tracks
+import com.carlca.bitwiglibrary.ExtensionSettings
 
 class MidiMixExtension(definition: MidiMixExtensionDefinition, host: ControllerHost)
     extends ControllerExtension(definition, host):

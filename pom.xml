@@ -18,12 +18,12 @@
         <dependency>
             <groupId>com.bitwig</groupId>
             <artifactId>extension-api</artifactId>
-            <version>18</version>
+            <version>20</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala3-library_3</artifactId>
-            <version>3.6.3</version>
+            <version>3.6.4</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>

@@ -6,13 +6,16 @@ lazy val root = (project in file("."))
   .settings(
     name                := "MidiMix",
     resolvers           += "Bitwig Maven Repository" at "https://maven.bitwig.com",
-    libraryDependencies += "com.bitwig" % "extension-api" % "18" % "provided",
+
+    libraryDependencies += "com.bitwig" % "extension-api" % "20" % "provided",
     libraryDependencies += "org.json"   % "json"          % "20231013",
-    logLevel            := Level.Error,
-    scalacOptions       ++= Seq(
+
+    logLevel := Level.Error,
+    semanticdbEnabled := true,
+    scalacOptions ++= Seq(
       "-deprecation",
       "-Wunused:all"
-  ),
+    ),
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, _)) =>
