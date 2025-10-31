@@ -2,7 +2,7 @@ package com.carlca.midimix
 
 import com.carlca.logger.Log
 
-import com.carlca.bitwiglibrary.Tracks
+import com.carlca.bitwigutils.Tracks
 
 enum ButtonMode derives CanEqual:
   case Mute, Solo

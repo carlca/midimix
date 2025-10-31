@@ -1,7 +1,7 @@
 package com.carlca.midimix
 
 import com.bitwig.extension.controller.api.*
-import com.carlca.bitwiglibrary.Tracks
+import com.carlca.bitwigutils.Tracks
 
 object MidiMixLights:
   var mHost: ControllerHost = null
